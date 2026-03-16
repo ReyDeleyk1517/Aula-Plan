@@ -1,4 +1,4 @@
-class EntidadBitacora {
+class BitacoraEntidad {
   final int? id;
   final String fecha;
   final String hora;
@@ -7,7 +7,7 @@ class EntidadBitacora {
   final String actividad;
   final String observaciones;
 
-  EntidadBitacora({
+  BitacoraEntidad({
     this.id,
     required this.fecha,
     required this.hora,

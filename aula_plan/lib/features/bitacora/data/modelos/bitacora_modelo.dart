@@ -1,7 +1,7 @@
-import '../../domain/entidades/entidad_bitacora.dart';
+import '../../domain/entidades/bitacora_entidad.dart';
 
-class ModeloBitacora extends EntidadBitacora {
-  ModeloBitacora({
+class BitacoraModelo extends BitacoraEntidad {
+  BitacoraModelo({
     int? id,
     required String fecha,
     required String hora,
@@ -19,8 +19,8 @@ class ModeloBitacora extends EntidadBitacora {
           observaciones: observaciones,
         );
 
-  factory ModeloBitacora.desdeMapa(Map<String, dynamic> mapa) {
-    return ModeloBitacora(
+  factory BitacoraModelo.desdeMapa(Map<String, dynamic> mapa) {
+    return BitacoraModelo(
       id: mapa['id'],
       fecha: mapa['fecha'],
       hora: mapa['hora'],

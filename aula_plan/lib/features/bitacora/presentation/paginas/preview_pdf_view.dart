@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
-import 'package:aula_plan/features/bitacora/domain/entidades/entidad_bitacora.dart';
+import 'package:aula_plan/features/bitacora/domain/entidades/bitacora_entidad.dart';
 import 'package:aula_plan/core/servicio_pdf.dart';
 
 class PaginaPreviewPdf extends StatelessWidget {
-  final List<EntidadBitacora> registrosSeleccionados;
+  final List<BitacoraEntidad> registrosSeleccionados;
 
   const PaginaPreviewPdf({super.key, required this.registrosSeleccionados});
 

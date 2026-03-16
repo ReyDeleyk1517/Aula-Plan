@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entidades/entidad_bitacora.dart';
-import '../../domain/casos_uso/casos_uso.dart';
+import '../../domain/entidades/bitacora_entidad.dart';
+import '../../domain/casos_uso/bitacora_casos_uso.dart';
 
 enum FormStatus { inicial, cargando, exito, error }
 
@@ -20,7 +20,7 @@ class CubitFormularioBitacora extends Cubit<FormBitacoraState> {
     required this.editarRegistro,
   }) : super(FormBitacoraState());
 
-  Future<void> procesarRegistro(EntidadBitacora registro) async {
+  Future<void> procesarRegistro(BitacoraEntidad registro) async {
     emit(FormBitacoraState(status: FormStatus.cargando));
     try {
       if (registro.id == null) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entidades/entidad_bitacora.dart';
+import '../../domain/entidades/bitacora_entidad.dart';
 import '../bloc/cubit_formulario_bitacora.dart'; // Importa el nuevo cubit
 
 class PaginaRegistroBitacora extends StatefulWidget {
-  final EntidadBitacora? registroExistente;
+  final BitacoraEntidad? registroExistente;
   final DateTime fechaSeleccionada;
 
   const PaginaRegistroBitacora({
@@ -43,7 +43,7 @@ class _PaginaRegistroBitacoraState extends State<PaginaRegistroBitacora> {
 
   void _guardar(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      final registro = EntidadBitacora(
+      final registro = BitacoraEntidad(
         // Si tiene ID, el Cubit detectara que es edición
         id: widget.registroExistente?.id, 
         titulo: _tituloCtrl.text,

@@ -1,24 +1,24 @@
-import 'package:aula_plan/features/bitacora/presentation/paginas/pagina_preview_pdf.dart';
+import 'package:aula_plan/features/bitacora/presentation/paginas/preview_pdf_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:aula_plan/core/injection_container.dart';
 
 // Imports de dominio y lógica
-import 'package:aula_plan/features/bitacora/domain/entidades/entidad_bitacora.dart';
+import 'package:aula_plan/features/bitacora/domain/entidades/bitacora_entidad.dart';
 import '../bloc/cubit_bitacora.dart'; 
 import '../bloc/cubit_formulario_bitacora.dart';
 
 // Imports de presentación
-import '../widgets/tarjeta_actividad.dart';
-import 'pagina_registro_bitacora.dart';
+import '../widgets/tarjeta_registro_bitacora.dart';
+import 'bitacora_crear_editar_view.dart';
 
 class PaginaBitacora extends StatelessWidget {
   const PaginaBitacora({super.key});
 
   
 
-  Future<void> _irARegistro(BuildContext context, {EntidadBitacora? registro, required DateTime fecha}) async {
+  Future<void> _irARegistro(BuildContext context, {BitacoraEntidad? registro, required DateTime fecha}) async {
     final resultado = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -281,7 +281,7 @@ class PaginaBitacora extends StatelessWidget {
                 registro: registro, 
                 fecha: estado.fechaSeleccionada
               ),
-              child: TarjetaActividad(registro: registro, 
+              child: TarjetaRegistroBitacora(registro: registro, 
               estaSeleccionado: estado.registrosSeleccionados.contains(registro.id), 
               onToggleSeleccion: () => context.read<CubitBitacora>().toggleSeleccion(registro.id!),),
             );

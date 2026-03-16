@@ -1,17 +1,17 @@
-import '../../domain/entidades/entidad_bitacora.dart';
-import '../../domain/repositorios/repositorio_bitacora.dart';
+import '../../domain/entidades/bitacora_entidad.dart';
+import '../../domain/repositorios/bitacora_repositorio.dart';
 import '../fuentes_datos/bitacora_local_data_source.dart';
-import '../modelos/modelo_bitacora.dart';
+import '../modelos/bitacora_modelo.dart';
 
-class ImplementacionRepositorioBitacora implements RepositorioBitacora {
+class BitacoraImplementacionRepositorio implements BitacoraRepositorio {
   final BitacoraLocalDataSource fuenteDatosLocal;
 
-  ImplementacionRepositorioBitacora({required this.fuenteDatosLocal});
+  BitacoraImplementacionRepositorio({required this.fuenteDatosLocal});
 
   @override
-  Future<void> guardarRegistro(EntidadBitacora registro) async {
+  Future<void> guardarRegistro(BitacoraEntidad registro) async {
     // Convertir Entidad (Domain) a Modelo (Data) antes de mandar a la fuente
-    final modelo = ModeloBitacora(
+    final modelo = BitacoraModelo(
       id: registro.id,
       fecha: registro.fecha,
       hora: registro.hora,
@@ -24,7 +24,7 @@ class ImplementacionRepositorioBitacora implements RepositorioBitacora {
   }
 
   @override
-  Future<List<EntidadBitacora>> obtenerRegistros() async {
+  Future<List<BitacoraEntidad>> obtenerRegistros() async {
     // La fuente da Modelos, pero el Repositorio devuelve Entidades al Dominio
     return await fuenteDatosLocal.obtenerRegistros();
   }
@@ -35,7 +35,7 @@ class ImplementacionRepositorioBitacora implements RepositorioBitacora {
   }
 
   @override
-  Future<void> editarRegistro(EntidadBitacora registro) async {
+  Future<void> editarRegistro(BitacoraEntidad registro) async {
     // Convertir la Entidad a Modelo
     final modelo = _mapearEntidadAModelo(registro);
     
@@ -44,8 +44,8 @@ class ImplementacionRepositorioBitacora implements RepositorioBitacora {
   }
 
   
-  ModeloBitacora _mapearEntidadAModelo(EntidadBitacora registro) {
-    return ModeloBitacora(
+  BitacoraModelo _mapearEntidadAModelo(BitacoraEntidad registro) {
+    return BitacoraModelo(
       id: registro.id,
       fecha: registro.fecha,
       hora: registro.hora,

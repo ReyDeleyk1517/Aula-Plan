@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:aula_plan/features/bitacora/domain/entidades/entidad_bitacora.dart';
+import 'package:aula_plan/features/bitacora/domain/entidades/bitacora_entidad.dart';
 
 class ServicioPdf {
-  static Future<Uint8List> generarPdfBitacora(List<EntidadBitacora> registros) async {
+  static Future<Uint8List> generarPdfBitacora(List<BitacoraEntidad> registros) async {
     final pdf = pw.Document();
 
     final estiloTitulo = pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold);

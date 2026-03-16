@@ -1,11 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entidades/entidad_bitacora.dart';
+import '../../domain/entidades/bitacora_entidad.dart';
 //import '../../domain/repositorios/repositorio_bitacora.dart';
-import '../../domain/casos_uso/casos_uso.dart';
+import '../../domain/casos_uso/bitacora_casos_uso.dart';
 
 class BitacoraState {
   final bool cargando;
-  final List<EntidadBitacora> registros;
+  final List<BitacoraEntidad> registros;
   final DateTime fechaSeleccionada;
   final String? error;
 
@@ -24,7 +24,7 @@ class BitacoraState {
   // Método para copiar el estado fácilmente (pattern copyWith)
   BitacoraState copyWith({
     bool? cargando,
-    List<EntidadBitacora>? registros,
+    List<BitacoraEntidad>? registros,
     DateTime? fechaSeleccionada,
     String? error,
     String? filtroCategoria,

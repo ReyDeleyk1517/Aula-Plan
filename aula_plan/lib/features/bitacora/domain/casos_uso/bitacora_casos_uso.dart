@@ -1,19 +1,19 @@
-import '../entidades/entidad_bitacora.dart';
-import '../repositorios/repositorio_bitacora.dart';
+import '../entidades/bitacora_entidad.dart';
+import '../repositorios/bitacora_repositorio.dart';
 
 
 class ObtenerRegistrosBitacora {
-  final RepositorioBitacora repositorio; 
+  final BitacoraRepositorio repositorio; 
 
   ObtenerRegistrosBitacora(this.repositorio); 
 
-  Future<List<EntidadBitacora>> call() async {
+  Future<List<BitacoraEntidad>> call() async {
     return await repositorio.obtenerRegistros(); 
   }
 }
 
 class EliminarRegistroBitacora {
-  final RepositorioBitacora repositorio; 
+  final BitacoraRepositorio repositorio; 
 
   EliminarRegistroBitacora(this.repositorio);
 
@@ -24,22 +24,21 @@ class EliminarRegistroBitacora {
 
 
 class EditarRegistroBitacora {
-  final RepositorioBitacora repositorio; 
+  final BitacoraRepositorio repositorio; 
 
   EditarRegistroBitacora(this.repositorio);
 
-  Future<void> call(EntidadBitacora bitacora) async {
+  Future<void> call(BitacoraEntidad bitacora) async {
     return await repositorio.editarRegistro(bitacora); 
   }
 }
 
 class GuardarRegistroBitacora {
-  final RepositorioBitacora repositorio; 
+  final BitacoraRepositorio repositorio; 
 
   GuardarRegistroBitacora(this.repositorio);
 
-  Future<void> call(EntidadBitacora bitacora) async {
-    // Guardar un nuevo registro, no editar
+  Future<void> call(BitacoraEntidad bitacora) async {
     return await repositorio.guardarRegistro(bitacora); 
   }
 }

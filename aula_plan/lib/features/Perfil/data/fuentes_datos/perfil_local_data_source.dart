@@ -1,17 +1,18 @@
+import 'package:aula_plan/features/Perfil/data/modelos/perfil_modelo.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../modelos/bitacora_modelo.dart';
 
-abstract class BitacoraLocalDataSource {
-  Future<List<BitacoraModelo>> obtenerRegistros();
-  Future<void> insertarRegistro(BitacoraModelo modelo);
+abstract class PerfilLocalDataSource {
+  Future<List<PerfilModelo>> obtenerRegistros();
+  Future<void> insertarRegistro(PerfilModelo modelo);
   Future<void> borrarRegistro(int id);
-  Future<void> actualizarRegistro(BitacoraModelo modelo); 
+  Future<void> actualizarRegistro(PerfilModelo modelo);
 }
 
-class ImplementacionBitacoraLocalDataSource implements BitacoraLocalDataSource {
+class ImplementacionPerfilLocalDataSource implements PerfilLocalDataSource {
   Database? _db;
-  final String nombreTabla = 'bitacora';
+  // nombre de la tabla 
+  final String nombreTabla = 'perfil';
 
   Future<Database> get baseDeDatos async {
     if (_db != null) return _db!;
@@ -24,17 +25,16 @@ class ImplementacionBitacoraLocalDataSource implements BitacoraLocalDataSource {
     return await openDatabase(
       ruta,
       version: 1,
-      onCreate: (db, version) async {
-        // Crear la tabla de bitacora
-        await db.execute(
+      onCreate: (db, version) {
+        return db.execute(
           "CREATE TABLE $nombreTabla ("
           "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-          "fecha TEXT, "
-          "hora TEXT, "
-          "categoria TEXT, "
-          "titulo TEXT, "
-          "actividad TEXT, "
-          "observaciones TEXT"
+          "nombre TEXT, "
+          "apellidos TEXT, "
+          "region TEXT, "
+          "zona_escolar TEXT, "
+          "funcion TEXT, "
+          "centro_trabajo TEXT"
           ")"
         );
       },
@@ -42,8 +42,9 @@ class ImplementacionBitacoraLocalDataSource implements BitacoraLocalDataSource {
   }
 
   @override
-  Future<void> insertarRegistro(BitacoraModelo modelo) async {
+  Future<void> insertarRegistro(PerfilModelo modelo) async {
     final db = await baseDeDatos;
+    
     await db.insert(
       nombreTabla, 
       modelo.aMapa(), 
@@ -52,13 +53,11 @@ class ImplementacionBitacoraLocalDataSource implements BitacoraLocalDataSource {
   }
 
   @override
-  Future<List<BitacoraModelo>> obtenerRegistros() async {
+  Future<List<PerfilModelo>> obtenerRegistros() async {
     final db = await baseDeDatos;
-    final List<Map<String, dynamic>> mapas = await db.query(
-      nombreTabla, 
-      orderBy: 'id DESC'
-    );
-    return mapas.map((m) => BitacoraModelo.desdeMapa(m)).toList();
+    // Consultamos la tabla perfil
+    final List<Map<String, dynamic>> mapas = await db.query(nombreTabla);
+    return mapas.map((m) => PerfilModelo.desdeMapa(m)).toList();
   }
 
   @override
@@ -72,13 +71,13 @@ class ImplementacionBitacoraLocalDataSource implements BitacoraLocalDataSource {
   }
 
   @override
-  Future<void> actualizarRegistro(BitacoraModelo modelo) async {
+  Future<void> actualizarRegistro(PerfilModelo modelo) async {
     final db = await baseDeDatos;
     await db.update(
       nombreTabla,
-      modelo.aMapa(), 
-      where: 'id = ?', 
-      whereArgs: [modelo.id], 
+      modelo.aMapa(),
+      where: 'id = ?',
+      whereArgs: [modelo.id],
     );
   }
 }
