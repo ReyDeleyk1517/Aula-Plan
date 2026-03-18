@@ -97,7 +97,7 @@ class CubitBitacora extends Cubit<BitacoraState> {
     cargarRegistros(state.fechaSeleccionada);
   }
 
-  // --- Lógica de Selección ---
+  // Lógica de Selección 
 
   void toggleSeleccion(int id) {
     final actuales = List<int>.from(state.registrosSeleccionados);
@@ -113,7 +113,7 @@ class CubitBitacora extends Cubit<BitacoraState> {
     emit(state.copyWith(registrosSeleccionados: []));
   }
 
-  // --- Lógica de Borrado Múltiple ---
+  // Lógica de Borrado Múltiple 
 
   Future<void> borrarSeleccionados() async {
     emit(state.copyWith(cargando: true));

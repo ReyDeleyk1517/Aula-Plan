@@ -6,6 +6,7 @@ class BitacoraEntidad {
   final String titulo;
   final String actividad;
   final String observaciones;
+  final int? perfilId;
 
   BitacoraEntidad({
     this.id,
@@ -15,5 +16,6 @@ class BitacoraEntidad {
     required this.titulo,
     required this.actividad,
     required this.observaciones,
+    this.perfilId,
   });
 }

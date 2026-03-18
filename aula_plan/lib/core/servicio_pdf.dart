@@ -10,7 +10,6 @@ class ServicioPdf {
     final estiloTitulo = pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold);
     final estiloCelda = pw.TextStyle(fontSize: 8);
 
-    // Ordenar cronológicamente
     registros.sort((a, b) {
       int compFecha = a.fecha.compareTo(b.fecha);
       if (compFecha != 0) return compFecha;
@@ -34,14 +33,14 @@ class ServicioPdf {
 
           // Tabla
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5),
+            border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey),
             columnWidths: {
-              0: const pw.FlexColumnWidth(0.8), // Fecha (Reducido)
-              1: const pw.FlexColumnWidth(0.6), // Hora (Reducido)
-              2: const pw.FlexColumnWidth(1.0), // Categoría (Reducido)
-              3: const pw.FlexColumnWidth(1.0), // Título (Grande)
-              4: const pw.FlexColumnWidth(2.5), // Actividad (Más grande)
-              5: const pw.FlexColumnWidth(2.0), // Observaciones (Grande)
+              0: const pw.FlexColumnWidth(0.8), 
+              1: const pw.FlexColumnWidth(0.6), 
+              2: const pw.FlexColumnWidth(1.0), 
+              3: const pw.FlexColumnWidth(1.0), 
+              4: const pw.FlexColumnWidth(2.5), 
+              5: const pw.FlexColumnWidth(2.0), 
             },
             children: [
               // Fila de Encabezados
@@ -56,7 +55,7 @@ class ServicioPdf {
                   _celdaHeader("OBSERVACIONES", estiloCelda),
                 ],
               ),
-              // Filas de Datos
+              // Filas de Datos (USANDO .toString() EN TODO)
               ...registros.map((r) => pw.TableRow(
                 verticalAlignment: pw.TableCellVerticalAlignment.top,
                 children: [
@@ -72,7 +71,7 @@ class ServicioPdf {
           ),
 
           // Firmas
-          pw.SizedBox(height: 30),
+          pw.SizedBox(height: 40),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
             children: [
@@ -94,10 +93,12 @@ class ServicioPdf {
     );
   }
 
-  static pw.Widget _celdaTexto(String texto, pw.TextStyle estilo) {
+  // manejo de nulos
+  static pw.Widget _celdaTexto(dynamic valor, pw.TextStyle estilo) {
+    final String contenido = (valor == null) ? "" : valor.toString();
     return pw.Padding(
       padding: const pw.EdgeInsets.all(4),
-      child: pw.Text(texto, style: estilo),
+      child: pw.Text(contenido, style: estilo),
     );
   }
 
@@ -105,7 +106,7 @@ class ServicioPdf {
     return pw.Column(
       children: [
         pw.Container(width: 140, decoration: const pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(width: 0.5)))),
-        pw.SizedBox(height: 2),
+        pw.SizedBox(height: 5),
         pw.Text(cargo, style: const pw.TextStyle(fontSize: 7)),
       ],
     );

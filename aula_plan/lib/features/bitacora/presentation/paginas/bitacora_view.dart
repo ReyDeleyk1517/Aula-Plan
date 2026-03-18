@@ -42,7 +42,7 @@ class PaginaBitacora extends StatelessWidget {
     }
   }
 
-  // --- Funciones de Lógica de Fechas ---
+  // Funciones de Lógica de Fechas 
 
   List<DateTime> _generarSemana(DateTime fecha) {
     int diaActual = fecha.weekday;
@@ -87,7 +87,7 @@ class PaginaBitacora extends StatelessWidget {
     );
   }
 
-  // --- Construcción de la Interfaz ---
+  // Construcción de la Interfaz
 
   @override
   Widget build(BuildContext context) {
@@ -117,12 +117,7 @@ class PaginaBitacora extends StatelessWidget {
                         .where((r) => estado.registrosSeleccionados.contains(r.id))
                         .toList();
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PaginaPreviewPdf(registrosSeleccionados: registrosParaPdf),
-                      ),
-                    );
+                    _modalCrearPDF(context, registrosParaPdf);
                   },
                   label: const Text("Generar PDF"),
                   icon: const Icon(Icons.picture_as_pdf),
@@ -177,43 +172,57 @@ class PaginaBitacora extends StatelessWidget {
         final semana = _generarSemana(estado.fechaSeleccionada);
         return Container(
           color: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10), 
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: semana.map((fecha) {
-              bool esSeleccionado = DateUtils.isSameDay(fecha, estado.fechaSeleccionada);
-              return GestureDetector(
-                onTap: () => context.read<CubitBitacora>().cambiarFecha(fecha),
-                onLongPress: () => _seleccionarFechaCalendario(context, estado.fechaSeleccionada),
-                child: Column(
-                  children: [
-                    Text(
-                      DateFormat('E', 'es_ES').format(fecha).toUpperCase().replaceAll('.', ''),
-                      style: TextStyle(
-                        fontSize: 10, 
-                        fontWeight: FontWeight.bold,
-                        color: esSeleccionado ? const Color(0xFF6366F1) : Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: esSeleccionado ? const Color(0xFF6366F1) : Colors.transparent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        fecha.day.toString(),
+            children: [
+              // Lista de dias
+              ...semana.map((fecha) {
+                bool esSeleccionado = DateUtils.isSameDay(fecha, estado.fechaSeleccionada);
+                return GestureDetector(
+                  onTap: () => context.read<CubitBitacora>().cambiarFecha(fecha),
+                  //onLongPress: () => _seleccionarFechaCalendario(context, estado.fechaSeleccionada),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        DateFormat('E', 'es_ES').format(fecha).toUpperCase().replaceAll('.', ''),
                         style: TextStyle(
-                          color: esSeleccionado ? Colors.white : Colors.black, 
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
+                          color: esSeleccionado ? const Color(0xFF6366F1) : Colors.grey,
                         ),
                       ),
-                    )
-                  ],
-                ),
-              );
-            }).toList(),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: esSeleccionado ? const Color(0xFF6366F1) : Colors.transparent,
+                          shape: BoxShape.circle,
+                          // Añadí un borde sutil cuando no está seleccionado para dar feedback visual
+                          border: Border.all(
+                            color: esSeleccionado ? const Color(0xFF6366F1) : Colors.transparent,
+                          ),
+                        ),
+                        child: Text(
+                          fecha.day.toString(),
+                          style: TextStyle(
+                            color: esSeleccionado ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              }),
+              // boton calendario
+              IconButton(
+                icon: const Icon(Icons.calendar_month_outlined, color: Color(0xFF6366F1)),
+                onPressed: () => _seleccionarFechaCalendario(context, estado.fechaSeleccionada),
+                tooltip: "Seleccionar fecha",
+              ),
+            ],
           ),
         );
       },
@@ -275,17 +284,68 @@ class PaginaBitacora extends StatelessWidget {
           itemCount: estado.registros.length,
           itemBuilder: (context, i) {
             final registro = estado.registros[i];
-            return GestureDetector(
+            return TarjetaRegistroBitacora(
+              registro: registro, 
+              estaSeleccionado: estado.registrosSeleccionados.contains(registro.id),
+              // Pasamos la función de navegación directamente aquí
               onTap: () => _irARegistro(
                 context, 
                 registro: registro, 
                 fecha: estado.fechaSeleccionada
               ),
-              child: TarjetaRegistroBitacora(registro: registro, 
-              estaSeleccionado: estado.registrosSeleccionados.contains(registro.id), 
-              onToggleSeleccion: () => context.read<CubitBitacora>().toggleSeleccion(registro.id!),),
+              onToggleSeleccion: () => context.read<CubitBitacora>().toggleSeleccion(registro.id!),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _modalCrearPDF(BuildContext context, List<BitacoraEntidad> registrosParaPdf) {
+    final controller = TextEditingController(
+      // Nombre por defecto con la fecha actual
+      text: "Bitacora_${DateTime.now().day}_${DateTime.now().month}",
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Nombre del archivo"),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: "Ej: Reporte_Marzo",
+              suffixText: ".pdf",
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final nombreFinal = controller.text.trim();
+                if (nombreFinal.isNotEmpty) {
+                  Navigator.pop(context); // Cerrar modal
+                  
+                  // Navegar a la preview pasando el nombre
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaginaPreviewPdf(
+                        registrosSeleccionados: registrosParaPdf,
+                        nombre_archivo: "$nombreFinal.pdf", 
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text("Continuar"),
+            ),
+          ],
         );
       },
     );

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:aula_plan/features/bitacora/domain/entidades/bitacora_entidad.dart';
-import 'package:aula_plan/core/servicio_pdf.dart';
+import 'package:aula_plan/core/bitacora_servicio_pdf.dart';
 
 class PaginaPreviewPdf extends StatelessWidget {
   final List<BitacoraEntidad> registrosSeleccionados;
+  final String nombre_archivo;
 
-  const PaginaPreviewPdf({super.key, required this.registrosSeleccionados});
+  const PaginaPreviewPdf({
+    super.key, 
+    required this.registrosSeleccionados,
+    required this.nombre_archivo,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,7 @@ class PaginaPreviewPdf extends StatelessWidget {
       ),
       body: PdfPreview(
         // recibir directamente los bytes del servicio
-        build: (format) => ServicioPdf.generarPdfBitacora(registrosSeleccionados),
+        build: (format) => BitacoraServicioPdf.generarPdfBitacora(registrosSeleccionados),
         
         // Configuraciones de visualización
         allowPrinting: true,
@@ -28,7 +33,7 @@ class PaginaPreviewPdf extends StatelessWidget {
         canDebug: false, 
         
         // Nombre del archivo 
-        pdfFileName: "Bitacora_${DateTime.now().day}_${DateTime.now().month}.pdf",
+        pdfFileName: nombre_archivo,
         
         // Loader 
         loadingWidget: const Center(

@@ -9,15 +9,17 @@ class BitacoraModelo extends BitacoraEntidad {
     required String titulo,
     required String actividad,
     required String observaciones,
+    int? perfilId,
   }) : super(
-          id: id,
-          fecha: fecha,
-          hora: hora,
-          categoria: categoria,
-          titulo: titulo,
-          actividad: actividad,
-          observaciones: observaciones,
-        );
+            id: id,
+            fecha: fecha,
+            hora: hora,
+            categoria: categoria,
+            titulo: titulo,
+            actividad: actividad,
+            observaciones: observaciones,
+            perfilId: perfilId,
+          );
 
   factory BitacoraModelo.desdeMapa(Map<String, dynamic> mapa) {
     return BitacoraModelo(
@@ -28,6 +30,7 @@ class BitacoraModelo extends BitacoraEntidad {
       titulo: mapa['titulo'],
       actividad: mapa['actividad'],
       observaciones: mapa['observaciones'],
+      perfilId: mapa['perfil_id'],
     );
   }
 
@@ -40,6 +43,7 @@ class BitacoraModelo extends BitacoraEntidad {
       'titulo': titulo,
       'actividad': actividad,
       'observaciones': observaciones,
+      'perfil_id': perfilId,
     };
   }
 }
