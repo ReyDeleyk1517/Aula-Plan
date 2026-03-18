@@ -11,26 +11,13 @@ class PerfilView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      // Creamos el Cubit y cargamos los datos inmediatamente
+      // Crear el Cubit y cargamos los datos inmediatamente
       create: (_) => di.sl<CubitPerfil>()..cargarPerfiles(),
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Mi Perfil"),
           centerTitle: true,
-          actions: [
-            // Botón de editar en la parte superior para fácil acceso
-            BlocBuilder<CubitPerfil, PerfilState>(
-              builder: (context, state) {
-                if (state.perfiles.isNotEmpty) {
-                  return IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _irAFormulario(context, state.perfiles.first),
-                  );
-                }
-                return const SizedBox();
-              },
-            ),
-          ],
+          
         ),
         body: BlocBuilder<CubitPerfil, PerfilState>(
           builder: (context, state) {
@@ -55,7 +42,7 @@ class PerfilView extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   
-                  // Información mostrada en tarjetas de solo lectura
+                  // Información 
                   _InfoCard(label: "Nombre Completo", value: "${perfil.nombre} ${perfil.apellidos}", icon: Icons.badge),
                   _InfoCard(label: "Región", value: perfil.region, icon: Icons.map),
                   _InfoCard(label: "Zona Escolar", value: perfil.zona_escolar, icon: Icons.school),
@@ -94,7 +81,7 @@ class PerfilView extends StatelessWidget {
   }
 }
 
-// Widget auxiliar para mostrar la información bonita
+
 class _InfoCard extends StatelessWidget {
   final String label;
   final String value;

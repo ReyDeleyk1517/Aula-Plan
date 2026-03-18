@@ -148,6 +148,8 @@ class TarjetaRegistroBitacora extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: RichText(
+            maxLines: 2, 
+            overflow: TextOverflow.ellipsis, 
             text: TextSpan(
               style: const TextStyle(fontSize: 13, color: Color(0xFF475569)),
               children: [

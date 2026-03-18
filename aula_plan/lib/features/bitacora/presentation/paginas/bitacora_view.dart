@@ -93,6 +93,11 @@ class PaginaBitacora extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+          title: const Text("Bitacora Docente"),
+          centerTitle: true,
+          
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -155,8 +160,8 @@ class PaginaBitacora extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 30),
           child: Column(
             children: [
-              const Text("Bitácora Docente", 
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+              //const Text("Bitácora Docente", 
+              //  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
               const SizedBox(height: 5),
               Text(textoFecha, style: const TextStyle(color: Color(0xFF64748B))),
             ],
@@ -232,10 +237,11 @@ class PaginaBitacora extends StatelessWidget {
   Widget _filtros() {
     return BlocBuilder<CubitBitacora, BitacoraState>(
       builder: (context, estado) {
-        final listaFiltros = ["Todos", "Incidencias", "Evaluaciones", "Clases"];
+        final listaFiltros = ["Todos", "Incidencias", "Evaluaciones", "Clases","Otros"];
         return SizedBox(
           height: 60,
           child: ListView.builder(
+            
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             itemCount: listaFiltros.length,
@@ -280,7 +286,12 @@ class PaginaBitacora extends StatelessWidget {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.only(
+            left: 20, 
+            right: 20, 
+            top: 0, 
+            bottom: 150 
+          ),
           itemCount: estado.registros.length,
           itemBuilder: (context, i) {
             final registro = estado.registros[i];
@@ -329,7 +340,7 @@ class PaginaBitacora extends StatelessWidget {
               onPressed: () {
                 final nombreFinal = controller.text.trim();
                 if (nombreFinal.isNotEmpty) {
-                  Navigator.pop(context); // Cerrar modal
+                  Navigator.pop(context);
                   
                   // Navegar a la preview pasando el nombre
                   Navigator.push(
