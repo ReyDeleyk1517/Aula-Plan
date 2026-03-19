@@ -47,7 +47,7 @@ class BitacoraImplementacionRepositorio implements BitacoraRepositorio {
   }
 
   
-BitacoraModelo _mapearEntidadAModelo(BitacoraEntidad registro) {
+  BitacoraModelo _mapearEntidadAModelo(BitacoraEntidad registro) {
     return BitacoraModelo(
       id: registro.id,
       fecha: registro.fecha,

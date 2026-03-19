@@ -1,3 +1,5 @@
+import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
+import 'package:aula_plan/features/recursos_docentes/presentation/paginas/recurso_docente_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,6 +45,9 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => sl<CubitBitacora>()..cargarRegistros(DateTime.now()),
+        ),
+        BlocProvider(
+          create: (context) => sl<RecursosDocenteCubit>()..cargarRecursos(),
         ),
       ],
       child: MaterialApp(
@@ -172,7 +177,7 @@ class MenuPrincipal extends StatelessWidget {
               titulo: 'Recursos',
               icono: Icons.folder_shared_rounded,
               color: Colors.amber,
-              destino: const PlaceholderView(titulo: 'Recursos', color: Colors.amber),
+              destino: RecursosDocenteScreen(),
             ),
             _crearBotonModulo(
               context,

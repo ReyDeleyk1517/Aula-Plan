@@ -23,6 +23,7 @@ class DbHelper {
 
   static const String bitacoraTable = 'bitacora';
   static const String perfilTable = 'perfil';
+  static const String recursosTable = 'recursos_docentes';
 
 
   Future<bool> existePerfil() async {
@@ -65,6 +66,22 @@ class DbHelper {
             FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id)
           )
           ''',
+        );
+        await db.execute(
+          '''
+          CREATE TABLE $recursosTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            area TEXT,
+            campo_formativo TEXT,
+            tipo_archivo TEXT,
+            ruta_archivo TEXT,
+            enlace TEXT,
+            fecha_creacion TEXT,
+            perfil_id INTEGER,
+            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id)
+          )
+          '''
         );
       },
     );

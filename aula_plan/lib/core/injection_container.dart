@@ -1,3 +1,8 @@
+import 'package:aula_plan/features/recursos_docentes/data/fuentes_datos/recurso_docente_local_data_source.dart';
+import 'package:aula_plan/features/recursos_docentes/data/repositorios/recurso_docente_implementacion_repositorio.dart';
+import 'package:aula_plan/features/recursos_docentes/domain/casos_uso/recurso_docentes_casos_uso.dart';
+import 'package:aula_plan/features/recursos_docentes/domain/repositorios/recurso_docentes_repositorio.dart';
+import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 // Bitacora
@@ -80,5 +85,34 @@ Future<void> init() async {
 
   sl.registerLazySingleton<PerfilLocalDataSource>(
     () => ImplementacionPerfilLocalDataSource(),
+  );
+
+  // ===========================================================================
+  // MODULO: RECURSOS DOCENTES
+  // ===========================================================================
+
+  // Presentation (Cubit)
+  sl.registerFactory(() => RecursosDocenteCubit(
+    guardarRegistros: sl(), 
+    eliminarRegistro: sl(),
+    obtenerRegistros: sl(), 
+  ));
+
+  // Domain (Use Cases)
+  sl.registerLazySingleton(() => ObtenerRegistrosRecursos(sl()));
+  sl.registerLazySingleton(() => EliminarRegistroRecursos(sl()));
+  sl.registerLazySingleton(() => GuardarRegistroRecursos(sl()));
+  sl.registerLazySingleton(() => EditarRegistroRecursos(sl()));
+
+
+  // Data (Repositorio) 
+  sl.registerLazySingleton<RecursoDocentesRepositorio>(
+    () => RecursoDocenteRepositorioImpl(
+      fuenteDatosLocal: sl(),
+    ), 
+  );
+
+  sl.registerLazySingleton<RecursoDocenteLocalDataSource>(
+    () => ImplementacionRecursoDocenteLocalDataSource(),
   );
 }

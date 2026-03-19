@@ -55,7 +55,7 @@ class ServicioPdf {
                   _celdaHeader("OBSERVACIONES", estiloCelda),
                 ],
               ),
-              // Filas de Datos (USANDO .toString() EN TODO)
+              // Filas de Datos 
               ...registros.map((r) => pw.TableRow(
                 verticalAlignment: pw.TableCellVerticalAlignment.top,
                 children: [
