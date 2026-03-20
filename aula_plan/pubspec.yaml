@@ -28,6 +28,9 @@ dependencies:
   archive: ^4.0.9
   url_launcher: ^6.3.2
   file_picker: ^10.3.10
+  font_awesome_flutter: ^11.0.0
+  sqflite_common_ffi: ^2.4.0+2
+  sqlite3_flutter_libs: ^0.6.0+eol
 
 dev_dependencies:
   flutter_test:
