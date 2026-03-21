@@ -12,7 +12,13 @@ class Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(color: AppColors.bgApp, borderRadius: BorderRadius.circular(4)),
-      child: Text(text.toUpperCase(), style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppColors.textLight)),
+      child: Text(
+        text.toUpperCase(), 
+        style: const TextStyle(fontSize: 8, 
+        fontWeight: FontWeight.bold, 
+        color: AppColors.textLight,
+        overflow: TextOverflow.ellipsis
+      )),
     );
   }
 }

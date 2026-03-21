@@ -1,32 +1,42 @@
 import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/paginas/recurso_docente_view.dart';
+import 'package:aula_plan/planeacion_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
-// Importaciones de tu proyecto
 import 'core/injection_container.dart' as di;
 import 'core/injection_container.dart';
-// Asegúrate de que la ruta de tu DbHelper sea correcta
+
 import 'package:aula_plan/core/db_helper.dart'; 
 
 import 'package:aula_plan/features/Perfil/presentation/paginas/perfil_form_view.dart';
 import 'package:aula_plan/features/Perfil/presentation/paginas/perfil_view.dart';
-import 'package:aula_plan/features/bitacora/presentation/bloc/cubit_bitacora.dart';
+import 'package:aula_plan/features/bitacora/presentation/bloc/bitacora_cubit.dart';
 import 'package:aula_plan/features/bitacora/presentation/paginas/bitacora_view.dart';
+
+import 'dart:io'; // detectar la plataforma
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Importar FFI para sqlite windows
 
 void main() async {
   try {
-    
     WidgetsFlutterBinding.ensureInitialized();
-    
+
+    // --- AGREGAR ESTO PARA WINDOWS ---
+    if (Platform.isWindows || Platform.isLinux) {
+      // Inicializar FFI para bases de datos en escritorio
+      sqfliteFfiInit();
+      // Cambiar el factory global para usar FFI
+      databaseFactory = databaseFactoryFfi;
+    }
+    // ---------------------------------
+
     // Inicializar dependencias (GetIt)
     await di.init(); 
+    
     // Inicializar la base de datos
     await DbHelper().initDatabase();
     
-    // Inicializar fechas en español
     await initializeDateFormatting('es_ES', null);
 
     runApp(const MainApp());
@@ -44,7 +54,7 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => sl<CubitBitacora>()..cargarRegistros(DateTime.now()),
+          create: (context) => sl<BitacoraCubit>()..cargarRegistros(DateTime.now()),
         ),
         BlocProvider(
           create: (context) => sl<RecursosDocenteCubit>()..cargarRecursos(),
@@ -156,14 +166,14 @@ class MenuPrincipal extends StatelessWidget {
               titulo: 'Bitácora',
               icono: Icons.auto_stories,
               color: Colors.indigo,
-              destino: const PaginaBitacora(),
+              destino: const BitacoraView(),
             ),
             _crearBotonModulo(
               context,
               titulo: 'Planeación',
               icono: Icons.assignment_turned_in_rounded,
               color: Colors.teal,
-              destino: const PlaceholderView(titulo: 'Planeación', color: Colors.teal),
+              destino: PlaneacionScreen(),
             ),
             _crearBotonModulo(
               context,
@@ -177,7 +187,7 @@ class MenuPrincipal extends StatelessWidget {
               titulo: 'Recursos',
               icono: Icons.folder_shared_rounded,
               color: Colors.amber,
-              destino: RecursosDocenteScreen(),
+              destino: RecursosDocenteView(),
             ),
             _crearBotonModulo(
               context,

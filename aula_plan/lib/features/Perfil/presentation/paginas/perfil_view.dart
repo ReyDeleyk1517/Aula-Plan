@@ -35,12 +35,6 @@ class PerfilView extends StatelessWidget {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.indigo,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
-                  ),
-                  const SizedBox(height: 20),
                   
                   // Información 
                   _InfoCard(label: "Nombre Completo", value: "${perfil.nombre} ${perfil.apellidos}", icon: Icons.badge),

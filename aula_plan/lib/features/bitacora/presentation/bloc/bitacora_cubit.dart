@@ -42,13 +42,13 @@ class BitacoraState {
 }
 
 // --- Cubit ---
-class CubitBitacora extends Cubit<BitacoraState> {
+class BitacoraCubit extends Cubit<BitacoraState> {
   // Inyectar Casos de Uso en lugar del Repositorio
   final ObtenerRegistrosBitacora obtenerRegistros;
   final EliminarRegistroBitacora eliminarRegistro;
 
 
-  CubitBitacora({
+  BitacoraCubit({
     required this.obtenerRegistros,
 
     required this.eliminarRegistro,

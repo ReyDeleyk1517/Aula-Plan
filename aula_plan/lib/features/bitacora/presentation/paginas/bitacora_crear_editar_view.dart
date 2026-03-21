@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entidades/bitacora_entidad.dart';
-import '../bloc/cubit_formulario_bitacora.dart'; // Importa el nuevo cubit
+import '../bloc/bitacora_crear_editar_cubit.dart'; 
 
-class PaginaRegistroBitacora extends StatefulWidget {
+class BitacoraCrearEditarView extends StatefulWidget {
   final BitacoraEntidad? registroExistente;
   final DateTime fechaSeleccionada;
 
-  const PaginaRegistroBitacora({
+  const BitacoraCrearEditarView({
     super.key, 
     this.registroExistente, 
     required this.fechaSeleccionada
   });
 
   @override
-  State<PaginaRegistroBitacora> createState() => _PaginaRegistroBitacoraState();
+  State<BitacoraCrearEditarView> createState() => _PaginaRegistroBitacoraState();
 }
 
-class _PaginaRegistroBitacoraState extends State<PaginaRegistroBitacora> {
+class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
   final _formKey = GlobalKey<FormState>();
   
   late TextEditingController _tituloCtrl;
@@ -55,13 +55,13 @@ class _PaginaRegistroBitacoraState extends State<PaginaRegistroBitacora> {
                "${widget.fechaSeleccionada.year}-${widget.fechaSeleccionada.month.toString().padLeft(2, '0')}-${widget.fechaSeleccionada.day.toString().padLeft(2, '0')}",
       );
 
-      context.read<CubitFormularioBitacora>().procesarRegistro(registro);
+      context.read<BitacoraCrearEditarCubit>().procesarRegistro(registro);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CubitFormularioBitacora, FormBitacoraState>(
+    return BlocListener<BitacoraCrearEditarCubit, BitacoraCrearEditarState>(
       listener: (context, state) {
         if (state.status == FormStatus.exito) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -117,7 +117,7 @@ class _PaginaRegistroBitacoraState extends State<PaginaRegistroBitacora> {
                 ),
                 const SizedBox(height: 30),
                 
-                BlocBuilder<CubitFormularioBitacora, FormBitacoraState>(
+                BlocBuilder<BitacoraCrearEditarCubit, BitacoraCrearEditarState>(
                   builder: (context, state) {
                     return SizedBox(
                       width: double.infinity,

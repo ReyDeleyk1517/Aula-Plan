@@ -6,15 +6,15 @@ import 'package:aula_plan/core/injection_container.dart';
 
 // Imports de dominio y lógica
 import 'package:aula_plan/features/bitacora/domain/entidades/bitacora_entidad.dart';
-import '../bloc/cubit_bitacora.dart'; 
-import '../bloc/cubit_formulario_bitacora.dart';
+import '../bloc/bitacora_cubit.dart'; 
+import '../bloc/bitacora_crear_editar_cubit.dart';
 
 // Imports de presentación
 import '../widgets/tarjeta_registro_bitacora.dart';
 import 'bitacora_crear_editar_view.dart';
 
-class PaginaBitacora extends StatelessWidget {
-  const PaginaBitacora({super.key});
+class BitacoraView extends StatelessWidget {
+  const BitacoraView({super.key});
 
   
 
@@ -25,8 +25,8 @@ class PaginaBitacora extends StatelessWidget {
         builder: (_) => BlocProvider(
           // Pedir el Cubit directamente a GetIt. 
           // GetIt se encarga de inyectar los Casos de Uso por nosotros.
-          create: (context) => sl<CubitFormularioBitacora>(),
-          child: PaginaRegistroBitacora(
+          create: (context) => sl<BitacoraCrearEditarCubit>(),
+          child: BitacoraCrearEditarView(
             registroExistente: registro,
             fechaSeleccionada: fecha,
           ),
@@ -37,7 +37,7 @@ class PaginaBitacora extends StatelessWidget {
 
     if (resultado == true) {
       if (context.mounted) {
-        context.read<CubitBitacora>().cargarRegistros(fecha);
+        context.read<BitacoraCubit>().cargarRegistros(fecha);
       }
     }
   }
@@ -59,7 +59,7 @@ class PaginaBitacora extends StatelessWidget {
       locale: const Locale('es', 'ES'),
     );
     if (seleccionado != null) {
-      context.read<CubitBitacora>().cambiarFecha(seleccionado);
+      context.read<BitacoraCubit>().cambiarFecha(seleccionado);
     }
   }
 
@@ -77,7 +77,7 @@ class PaginaBitacora extends StatelessWidget {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
-              context.read<CubitBitacora>().borrarSeleccionados();
+              context.read<BitacoraCubit>().borrarSeleccionados();
               Navigator.pop(innerContext);
             },
             child: const Text("Eliminar"),
@@ -108,7 +108,7 @@ class PaginaBitacora extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: BlocBuilder<CubitBitacora, BitacoraState>(
+      floatingActionButton: BlocBuilder<BitacoraCubit, BitacoraState>(
         builder: (context, estado) {
 
           if (estado.registrosSeleccionados.isNotEmpty) {
@@ -151,7 +151,7 @@ class PaginaBitacora extends StatelessWidget {
   }
 
   Widget _cabecera() {
-    return BlocBuilder<CubitBitacora, BitacoraState>(
+    return BlocBuilder<BitacoraCubit, BitacoraState>(
       builder: (context, estado) {
         String textoFecha = DateFormat("EEEE, d 'de' MMMM yyyy", 'es_ES').format(estado.fechaSeleccionada);
         textoFecha = textoFecha[0].toUpperCase() + textoFecha.substring(1);
@@ -172,7 +172,7 @@ class PaginaBitacora extends StatelessWidget {
   }
 
   Widget _tiraDias() {
-    return BlocBuilder<CubitBitacora, BitacoraState>(
+    return BlocBuilder<BitacoraCubit, BitacoraState>(
       builder: (context, estado) {
         final semana = _generarSemana(estado.fechaSeleccionada);
         return Container(
@@ -185,7 +185,7 @@ class PaginaBitacora extends StatelessWidget {
               ...semana.map((fecha) {
                 bool esSeleccionado = DateUtils.isSameDay(fecha, estado.fechaSeleccionada);
                 return GestureDetector(
-                  onTap: () => context.read<CubitBitacora>().cambiarFecha(fecha),
+                  onTap: () => context.read<BitacoraCubit>().cambiarFecha(fecha),
                   //onLongPress: () => _seleccionarFechaCalendario(context, estado.fechaSeleccionada),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -235,7 +235,7 @@ class PaginaBitacora extends StatelessWidget {
   }
 
   Widget _filtros() {
-    return BlocBuilder<CubitBitacora, BitacoraState>(
+    return BlocBuilder<BitacoraCubit, BitacoraState>(
       builder: (context, estado) {
         final listaFiltros = ["Todos", "Incidencias", "Evaluaciones", "Clases","Otros"];
         return SizedBox(
@@ -249,7 +249,7 @@ class PaginaBitacora extends StatelessWidget {
               final f = listaFiltros[index];
               bool esActivo = (estado.filtroCategoria == null && f == "Todos") || (estado.filtroCategoria == f);
               return GestureDetector(
-                onTap: () => context.read<CubitBitacora>().seleccionarFiltro(f),
+                onTap: () => context.read<BitacoraCubit>().seleccionarFiltro(f),
                 child: Container(
                   margin: const EdgeInsets.only(right: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -277,7 +277,7 @@ class PaginaBitacora extends StatelessWidget {
   }
 
   Widget _listaFeed() {
-    return BlocBuilder<CubitBitacora, BitacoraState>(
+    return BlocBuilder<BitacoraCubit, BitacoraState>(
       builder: (context, estado) {
         if (estado.cargando) return const Center(child: CircularProgressIndicator());
         if (estado.error != null) return Center(child: Text(estado.error!));
@@ -304,7 +304,7 @@ class PaginaBitacora extends StatelessWidget {
                 registro: registro, 
                 fecha: estado.fechaSeleccionada
               ),
-              onToggleSeleccion: () => context.read<CubitBitacora>().toggleSeleccion(registro.id!),
+              onToggleSeleccion: () => context.read<BitacoraCubit>().toggleSeleccion(registro.id!),
             );
           },
         );

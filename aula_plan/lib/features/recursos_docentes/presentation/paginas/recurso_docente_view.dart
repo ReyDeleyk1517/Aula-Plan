@@ -1,27 +1,20 @@
-import 'package:aula_plan/features/recursos_docentes/presentation/paginas/agregar_recurso_view.dart';
+import 'package:aula_plan/features/recursos_docentes/presentation/paginas/recurso_agregar_editar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:open_file_plus/open_file_plus.dart';
-import 'package:file_picker/file_picker.dart';
-
 import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../domain/entidades/recurso_docentes_entidad.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/widgets/app_colors.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/widgets/recurso_card.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/widgets/modal_filtros.dart';
-import 'package:aula_plan/features/recursos_docentes/presentation/widgets/filtro_activo.dart';
-import 'package:aula_plan/features/recursos_docentes/presentation/widgets/tag.dart';
 
 
-class RecursosDocenteScreen extends StatefulWidget {
-  const RecursosDocenteScreen({super.key});
+class RecursosDocenteView extends StatefulWidget {
+  const RecursosDocenteView({super.key});
 
   @override
-  State<RecursosDocenteScreen> createState() => _RecursosDocenteScreenState();
+  State<RecursosDocenteView> createState() => _RecursosDocenteViewState();
 }
 
-class _RecursosDocenteScreenState extends State<RecursosDocenteScreen> {
+class _RecursosDocenteViewState extends State<RecursosDocenteView> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -53,42 +46,39 @@ class _RecursosDocenteScreenState extends State<RecursosDocenteScreen> {
       ),
   floatingActionButton: BlocBuilder<RecursosDocenteCubit, RecursosDocenteState>(
         builder: (context, state) {
-          final tieneSeleccion = state.seleccionadosIds.isNotEmpty;
-
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (tieneSeleccion) ...[
-                FloatingActionButton.small(
-                  heroTag: 'btn_delete',
-                  backgroundColor: Colors.redAccent,
-                  onPressed: () {
-                    // borrar multiples
-                    for (var id in state.seleccionadosIds) {
-                      context.read<RecursosDocenteCubit>().eliminarRecurso(id);
-                    }
-                  },
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                const SizedBox(height: 12),
-                FloatingActionButton.small(
-                  heroTag: 'btn_share',
-                  backgroundColor: AppColors.accent,
+          // Si hay elementos seleccionados, mostramos acciones de exportar y eliminar, siguiendo el patrón de Bitácora
+          if (state.seleccionadosIds.isNotEmpty) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: 'zip',
                   onPressed: () => context.read<RecursosDocenteCubit>().exportarAZip(),
-                  child: const Icon(Icons.share, color: Colors.white),
+                  label: Text('Exportar ZIP (${state.seleccionadosIds.length})'),
+                  icon: const Icon(Icons.share),
+                  backgroundColor: AppColors.accent,
                 ),
                 const SizedBox(height: 12),
-              ],
-              FloatingActionButton(
-                heroTag: 'btn_add',
-                backgroundColor: AppColors.primary,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AgregarRecursoScreen()),
+                FloatingActionButton.extended(
+                  heroTag: 'delete',
+                  onPressed: () => _confirmarEliminacion(context),
+                  label: Text('Eliminar (${state.seleccionadosIds.length})'),
+                  icon: const Icon(Icons.delete),
+                  backgroundColor: Colors.red,
                 ),
-                child: Icon(tieneSeleccion ? Icons.close : Icons.add, color: Colors.white),
-              ),
-            ],
+              ],
+            );
+          }
+
+          // Botón principal para añadir recurso cuando no hay selección
+          return FloatingActionButton(
+            heroTag: 'btn_add',
+            backgroundColor: AppColors.primary,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RecursoAgregarEditarView()),
+            ),
+            child: Icon(Icons.add, color: Colors.white),
           );
         },
       ),
@@ -142,13 +132,31 @@ class _RecursosDocenteScreenState extends State<RecursosDocenteScreen> {
         final List<Widget> chips = [];
 
         if (state.filtroArea != 'Todas') {
-          chips.add(FiltroActivo(label: state.filtroArea, onDeleted: () => cubit.cambiarFiltroArea('Todas')));
+          chips.add(InputChip(
+            label: Text(state.filtroArea, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            onDeleted: () => cubit.cambiarFiltroArea('Todas'),
+            deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
+          ));
         }
         if (state.filtroCampo != 'Todos') {
-          chips.add(FiltroActivo(label: state.filtroCampo, onDeleted: () => cubit.cambiarFiltroCampo('Todos')));
+          chips.add(InputChip(
+            label: Text(state.filtroCampo, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            onDeleted: () => cubit.cambiarFiltroCampo('Todos'),
+            deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
+          ));
         }
         if (state.filtroTipo != 'Todos') {
-          chips.add(FiltroActivo(label: state.filtroTipo, onDeleted: () => cubit.cambiarFiltroTipo('Todos')));
+          chips.add(InputChip(
+            label: Text(state.filtroTipo, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            onDeleted: () => cubit.cambiarFiltroTipo('Todos'),
+            deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
+          ));
         }
 
         if (chips.isEmpty) return const SizedBox.shrink();
@@ -174,6 +182,31 @@ class _RecursosDocenteScreenState extends State<RecursosDocenteScreen> {
       builder: (context) => const ModalFiltros(),
     );
   }
+
+  void _confirmarEliminacion(BuildContext context) {
+    final seleccionados = context.read<RecursosDocenteCubit>().state.seleccionadosIds;
+    showDialog(
+      context: context,
+      builder: (innerContext) => AlertDialog(
+        title: const Text('Eliminar recursos'),
+        content: Text('¿Eliminar ${seleccionados.length} recursos seleccionados?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(innerContext), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () {
+              final cubit = context.read<RecursosDocenteCubit>();
+              for (var id in seleccionados) {
+                cubit.eliminarRecurso(id);
+              }
+              Navigator.pop(innerContext);
+            },
+            child: const Text('Eliminar'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 
@@ -190,7 +223,7 @@ class _RecursosList extends StatelessWidget {
         return ListView.builder(
           padding: const EdgeInsets.only(top: 15, bottom: 80),
           itemCount: items.length,
-          itemBuilder: (context, index) => RecursosCard(recurso: items[index]),
+          itemBuilder: (context, index) => RecursoCard(recurso: items[index]),
         );
       },
     );

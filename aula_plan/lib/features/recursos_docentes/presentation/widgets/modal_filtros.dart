@@ -33,7 +33,7 @@ class ModalFiltros extends StatelessWidget {
               const SizedBox(height: 15),
               OpcionesFiltrado(
                 label: "Áreas",
-                options: const ['Todas', 'Psicología', 'Comunicacion', 'Trabajo Social', 'Pedagogía'],
+                options: const ['Todas', 'Psicología', 'Comunicación', 'Trabajo Social', 'Pedagogía'],
                 selectedValue: state.filtroArea,
                 onSelected: (val) => cubit.cambiarFiltroArea(val),
               ),
@@ -45,7 +45,7 @@ class ModalFiltros extends StatelessWidget {
               ),
               OpcionesFiltrado(
                 label: "Tipo de Archivo",
-                options: const ['Todos', 'PDF', 'Imagen', 'Video', 'Otros'],
+                options: const ['Todos', 'Documentos', 'Imagen', 'Video', 'Enlace', 'Otros'],
                 selectedValue: state.filtroTipo,
                 onSelected: (val) => cubit.cambiarFiltroTipo(val),
               ),

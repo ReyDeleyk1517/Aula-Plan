@@ -4,33 +4,33 @@ import '../../domain/casos_uso/bitacora_casos_uso.dart';
 
 enum FormStatus { inicial, cargando, exito, error }
 
-class FormBitacoraState {
+class BitacoraCrearEditarState {
   final FormStatus status;
   final String? mensajeError;
 
-  FormBitacoraState({this.status = FormStatus.inicial, this.mensajeError});
+  BitacoraCrearEditarState({this.status = FormStatus.inicial, this.mensajeError});
 }
 
-class CubitFormularioBitacora extends Cubit<FormBitacoraState> {
+class BitacoraCrearEditarCubit extends Cubit<BitacoraCrearEditarState> {
   final GuardarRegistroBitacora guardarRegistro;
   final EditarRegistroBitacora editarRegistro;
 
-  CubitFormularioBitacora({
+  BitacoraCrearEditarCubit({
     required this.guardarRegistro,
     required this.editarRegistro,
-  }) : super(FormBitacoraState());
+  }) : super(BitacoraCrearEditarState());
 
   Future<void> procesarRegistro(BitacoraEntidad registro) async {
-    emit(FormBitacoraState(status: FormStatus.cargando));
+    emit(BitacoraCrearEditarState(status: FormStatus.cargando));
     try {
       if (registro.id == null) {
         await guardarRegistro(registro);
       } else {
         await editarRegistro(registro);
       }
-      emit(FormBitacoraState(status: FormStatus.exito));
+      emit(BitacoraCrearEditarState(status: FormStatus.exito));
     } catch (e) {
-      emit(FormBitacoraState(status: FormStatus.error, mensajeError: e.toString()));
+      emit(BitacoraCrearEditarState(status: FormStatus.error, mensajeError: e.toString()));
     }
   }
 }
