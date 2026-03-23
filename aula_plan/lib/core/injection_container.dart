@@ -116,7 +116,10 @@ Future<void> init() async {
     () => ImplementacionRecursoDocenteLocalDataSource(),
   );
 
-  // Planeaciones
+  // ===========================================================================
+  // MODULO: PLANEACIONES
+  // ===========================================================================
+
   sl.registerFactory(
     () => PlaneacionCrearEditarCubit(guardarPlaneacion: sl(), editarPlaneacion: sl()),
   );
