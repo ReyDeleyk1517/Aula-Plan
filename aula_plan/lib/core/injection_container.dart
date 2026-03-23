@@ -1,3 +1,4 @@
+// Recursos
 import 'package:aula_plan/features/recursos_docentes/data/fuentes_datos/recurso_docente_local_data_source.dart';
 import 'package:aula_plan/features/recursos_docentes/data/repositorios/recurso_docente_implementacion_repositorio.dart';
 import 'package:aula_plan/features/recursos_docentes/domain/casos_uso/recurso_docentes_casos_uso.dart';
@@ -13,6 +14,13 @@ import 'package:aula_plan/features/bitacora/presentation/bloc/bitacora_crear_edi
 import 'package:aula_plan/features/bitacora/domain/repositorios/bitacora_repositorio.dart';
 import 'package:aula_plan/features/bitacora/data/repositorios/bitacora_implementacion_repositorio.dart';
 import 'package:aula_plan/features/bitacora/data/fuentes_datos/bitacora_local_data_source.dart';
+// Planeaciones
+import 'package:aula_plan/features/planeaciones/domain/casos_uso/planeacion_casos_uso.dart';
+import 'package:aula_plan/features/planeaciones/domain/repositorios/planeacion_repositorio.dart';
+import 'package:aula_plan/features/planeaciones/data/repositorios/planeacion_implementacion_repositorio.dart';
+import 'package:aula_plan/features/planeaciones/data/fuentes_datos/planeacion_local_data_source.dart';
+import 'package:aula_plan/features/planeaciones/presentation/bloc/planeacion_cubit.dart';
+import 'package:aula_plan/features/planeaciones/presentation/bloc/planeacion_crear_editar_cubit.dart';
 // Perfil
 import 'package:aula_plan/features/Perfil/data/fuentes_datos/perfil_local_data_source.dart';
 import 'package:aula_plan/features/Perfil/domain/repositorios/perfil_repositorio.dart';
@@ -106,5 +114,26 @@ Future<void> init() async {
 
   sl.registerLazySingleton<RecursoDocenteLocalDataSource>(
     () => ImplementacionRecursoDocenteLocalDataSource(),
+  );
+
+  // Planeaciones
+  sl.registerFactory(
+    () => PlaneacionCrearEditarCubit(guardarPlaneacion: sl(), editarPlaneacion: sl()),
+  );
+  sl.registerFactory(
+    () => PlaneacionCubit(obtenerPlaneaciones: sl(), eliminarPlaneacion: sl()),
+  );
+
+  sl.registerLazySingleton(() => GuardarPlaneacion(sl()));
+  sl.registerLazySingleton(() => EditarPlaneacion(sl()));
+  sl.registerLazySingleton(() => ObtenerPlaneaciones(sl()));
+  sl.registerLazySingleton(() => EliminarPlaneacion(sl()));
+
+  sl.registerLazySingleton<PlaneacionRepositorio>(
+    () => PlaneacionImplementacionRepositorio(fuenteDatosLocal: sl()),
+  );
+
+  sl.registerLazySingleton<PlaneacionLocalDataSource>(
+    () => ImplementacionPlaneacionLocalDataSource(),
   );
 }

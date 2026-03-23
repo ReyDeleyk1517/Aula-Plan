@@ -20,27 +20,23 @@ class DbHelper {
     await database;
   }
 
-
-  static const String bitacoraTable = 'bitacora';
+  // Nombres de tablas
   static const String perfilTable = 'perfil';
+  static const String bitacoraTable = 'bitacora';
   static const String recursosTable = 'recursos_docentes';
-
-
-  Future<bool> existePerfil() async {
-    final db = await database;
-    final List<Map<String, dynamic>> x = await db.rawQuery('SELECT COUNT(*) FROM $perfilTable');
-    int? count = Sqflite.firstIntValue(x);
-    return (count ?? 0) > 0;
-  }
+  static const String planeacionTable = 'planeacion';
+  static const String fasesPlaneacionTable = 'fases_planeacion';
+  static const String eventoTable = 'evento';
 
   Future<Database> _initDatabase() async {
     final ruta = join(await getDatabasesPath(), 'database_docente.db');
+    
     return await openDatabase(
       ruta,
-      version: 2,
+      version: 1,
       onCreate: (db, version) async {
-        await db.execute(
-          '''
+        // --- Tabla Perfil ---
+        await db.execute('''
           CREATE TABLE $perfilTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
@@ -50,10 +46,10 @@ class DbHelper {
             funcion TEXT,
             centro_trabajo TEXT
           )
-          ''',
-        );
-        await db.execute(
-          '''
+        ''');
+
+        // --- Tabla Bitácora ---
+        await db.execute('''
           CREATE TABLE $bitacoraTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             fecha TEXT,
@@ -63,12 +59,12 @@ class DbHelper {
             actividad TEXT,
             observaciones TEXT,
             perfil_id INTEGER,
-            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id)
+            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
           )
-          ''',
-        );
-        await db.execute(
-          '''
+        ''');
+
+        // --- Tabla Recursos ---
+        await db.execute('''
           CREATE TABLE $recursosTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
@@ -79,14 +75,84 @@ class DbHelper {
             enlace TEXT,
             fecha_creacion TEXT,
             perfil_id INTEGER,
-            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id)
+            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
           )
-          '''
-        );
+        ''');
+
+        // --- Tabla Planeación ---
+        await db.execute('''
+          CREATE TABLE $planeacionTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            perfil_id INTEGER,
+            ciclo_escolar TEXT,
+            fecha_entrega TEXT,
+            nombre_escuela TEXT,
+            nivel_educativo TEXT,
+            fase_educativa TEXT,
+            grupo TEXT,
+            condicion_alumnado TEXT,
+            temporalidad TEXT,
+            necesidades_bap TEXT,
+            disciplina TEXT,
+            campos_formativos TEXT,
+            contenidos TEXT,
+            pda TEXT,
+            ejes_articuladores TEXT,
+            escenarios TEXT,
+            metodologia TEXT,
+            nombre_proyecto TEXT,
+            observaciones TEXT,
+            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
+          )
+        ''');
+
+        // --- Tabla Fases Planeación ---
+        await db.execute('''
+          CREATE TABLE $fasesPlaneacionTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_planeacion INTEGER,
+            fases_desarrollo TEXT,
+            actividades TEXT,
+            materiales_recursos TEXT,
+            organizacion_grupo TEXT,
+            espacio TEXT,
+            tiempo TEXT,
+            responsables TEXT,
+            evaluacion_indicadores TEXT,
+            evaluacion_instrumentos TEXT,
+            FOREIGN KEY (id_planeacion) REFERENCES $planeacionTable(id) ON DELETE CASCADE
+          )
+        ''');
+
+        // --- Tabla Evento ---
+        await db.execute('''
+          CREATE TABLE $eventoTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            perfil_id INTEGER,
+            titulo TEXT,
+            descripcion TEXT,
+            fecha_inicio TEXT,
+            fecha_fin TEXT,
+            tipo_evento TEXT,
+            lugar TEXT,
+            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
+          )
+        ''');
+      },
+      onConfigure: (db) async {
+        // Habilitar claves foráneas para que ON DELETE CASCADE funcione
+        await db.execute('PRAGMA foreign_keys = ON');
       },
     );
   }
 
+  // Métodos de utilidad existentes
+  Future<bool> existePerfil() async {
+    final db = await database;
+    final List<Map<String, dynamic>> x = await db.rawQuery('SELECT COUNT(*) FROM $perfilTable');
+    int? count = Sqflite.firstIntValue(x);
+    return (count ?? 0) > 0;
+  }
 
   Future<int?> obtenerPerfilId() async {
     final db = await database;

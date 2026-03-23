@@ -1,3 +1,4 @@
+import 'package:aula_plan/features/planeaciones/presentation/paginas/planeacion_list_view.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/paginas/recurso_docente_view.dart';
 import 'package:aula_plan/planeacion_screen.dart';
@@ -173,7 +174,7 @@ class MenuPrincipal extends StatelessWidget {
               titulo: 'Planeación',
               icono: Icons.assignment_turned_in_rounded,
               color: Colors.teal,
-              destino: PlaneacionScreen(),
+              destino: PlaneacionListView(),
             ),
             _crearBotonModulo(
               context,
