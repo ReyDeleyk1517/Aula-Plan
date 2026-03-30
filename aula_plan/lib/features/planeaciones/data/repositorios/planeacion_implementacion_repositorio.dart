@@ -46,21 +46,9 @@ class PlaneacionImplementacionRepositorio implements PlaneacionRepositorio {
 
 
   PlaneacionModelo _mapearEntidadAModelo(PlaneacionEntidad entidad, int? perfilId) {
-    // Mapeamos la lista de fases de Entidad a Modelo
-    final listaFasesModelos = entidad.fases.map((faseEntidad) {
-      return FasePlaneacionModelo(
-        id: faseEntidad.id,
-        idPlaneacion: faseEntidad.idPlaneacion,
-        fasesDesarrollo: faseEntidad.fasesDesarrollo,
-        actividades: faseEntidad.actividades,
-        materialesRecursos: faseEntidad.materialesRecursos,
-        organizacionGrupo: faseEntidad.organizacionGrupo,
-        espacio: faseEntidad.espacio,
-        tiempo: faseEntidad.tiempo,
-        responsables: faseEntidad.responsables,
-        evaluacionIndicadores: faseEntidad.evaluacionIndicadores,
-        evaluacionInstrumentos: faseEntidad.evaluacionInstrumentos,
-      );
+    // Mapeamos la lista de actividades de Entidad a Modelo
+    final listaActividadesModelos = entidad.actividades.map((actEntidad) {
+      return ActividadPlaneacionModelo.fromEntity(actEntidad);
     }).toList();
 
     return PlaneacionModelo(
@@ -84,46 +72,38 @@ class PlaneacionImplementacionRepositorio implements PlaneacionRepositorio {
       metodologia: entidad.metodologia,
       nombreProyecto: entidad.nombreProyecto,
       observaciones: entidad.observaciones,
-      fases: listaFasesModelos, 
+      organizacionGrupo: entidad.organizacionGrupo,
+      espacio: entidad.espacio,
+      tiempo: entidad.tiempo,
+      responsables: entidad.responsables,
+      evaluacionIndicadores: entidad.evaluacionIndicadores,
+      evaluacionInstrumentos: entidad.evaluacionInstrumentos,
+      // Mapear actividades en lugar de fases
+      actividades: listaActividadesModelos,
     );
   }
 
   @override
-  Future<void> editarFase(FasePlaneacionEntidad fase) async {
-    // Convertir la entidad de la fase a su modelo de datos
-    final modeloFase = FasePlaneacionModelo(
-      id: fase.id,
-      idPlaneacion: fase.idPlaneacion,
-      fasesDesarrollo: fase.fasesDesarrollo,
-      actividades: fase.actividades,
-      materialesRecursos: fase.materialesRecursos,
-      organizacionGrupo: fase.organizacionGrupo,
-      espacio: fase.espacio,
-      tiempo: fase.tiempo,
-      responsables: fase.responsables,
-      evaluacionIndicadores: fase.evaluacionIndicadores,
-      evaluacionInstrumentos: fase.evaluacionInstrumentos,
-    );
-
-    await fuenteDatosLocal.actualizarFaseIndividual(modeloFase);
+  Future<List<ActividadPlaneacionEntidad>> obtenerActividadesPorPlaneacion(int idPlaneacion) async {
+    // Consulta desde la fuente de datos local la lista de actividades para la planeación
+    final actividades = await fuenteDatosLocal.obtenerActividadesPorPlaneacion(idPlaneacion);
+    // Ya son entidades
+    return actividades;
   }
 
   @override
-  Future<void> agregarFaseAPlaneacion(int idPlaneacion, FasePlaneacionEntidad fase) async {
-    final modeloFase = FasePlaneacionModelo(
-      id: fase.id,
-      idPlaneacion: idPlaneacion, // insertar el ID de la planeación padre
-      fasesDesarrollo: fase.fasesDesarrollo,
-      actividades: fase.actividades,
-      materialesRecursos: fase.materialesRecursos,
-      organizacionGrupo: fase.organizacionGrupo,
-      espacio: fase.espacio,
-      tiempo: fase.tiempo,
-      responsables: fase.responsables,
-      evaluacionIndicadores: fase.evaluacionIndicadores,
-      evaluacionInstrumentos: fase.evaluacionInstrumentos,
-    );
+  Future<void> insertarActividadesParaPlaneacion(int idPlaneacion, List<ActividadPlaneacionEntidad> actividades) async {
+    // Convertimos cada Entidad a Modelo explícitamente usando el factory que ya creaste
+    final listaModelos = actividades.map((a) => ActividadPlaneacionModelo.fromEntity(a)).toList();
+    
+    await fuenteDatosLocal.insertarActividadesParaPlaneacion(idPlaneacion, listaModelos);
+  }
 
-    await fuenteDatosLocal.insertarFaseIndividual(modeloFase);
+  @override
+  Future<void> actualizarActividadesParaPlaneacion(int idPlaneacion, List<ActividadPlaneacionEntidad> actividades) async {
+    // Nota: Cambié el parámetro a List<ActividadPlaneacionEntidad> para que coincida con la interfaz del repositorio
+    final listaModelos = actividades.map((a) => ActividadPlaneacionModelo.fromEntity(a)).toList();
+    
+    await fuenteDatosLocal.actualizarActividadesParaPlaneacion(idPlaneacion, listaModelos);
   }
 }

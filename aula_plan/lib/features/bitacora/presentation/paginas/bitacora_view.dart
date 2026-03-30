@@ -1,4 +1,4 @@
-import 'package:aula_plan/features/bitacora/presentation/paginas/preview_pdf_view.dart';
+import 'package:aula_plan/features/bitacora/presentation/paginas/bitacora_preview_pdf_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +10,7 @@ import '../bloc/bitacora_cubit.dart';
 import '../bloc/bitacora_crear_editar_cubit.dart';
 
 // Imports de presentación
-import '../widgets/tarjeta_registro_bitacora.dart';
+import '../widgets/bitacora_card.dart';
 import 'bitacora_crear_editar_view.dart';
 
 class BitacoraView extends StatelessWidget {
@@ -22,14 +22,9 @@ class BitacoraView extends StatelessWidget {
     final resultado = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          // Pedir el Cubit directamente a GetIt. 
-          // GetIt se encarga de inyectar los Casos de Uso por nosotros.
-          create: (context) => sl<BitacoraCrearEditarCubit>(),
-          child: BitacoraCrearEditarView(
-            registroExistente: registro,
-            fechaSeleccionada: fecha,
-          ),
+        builder: (_) => BitacoraCrearEditarView(
+          registroExistente: registro,
+          fechaSeleccionada: fecha,
         ),
       ),
     );
@@ -54,8 +49,8 @@ class BitacoraView extends StatelessWidget {
     final DateTime? seleccionado = await showDatePicker(
       context: context,
       initialDate: fechaInicial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
       locale: const Locale('es', 'ES'),
     );
     if (seleccionado != null) {
@@ -295,7 +290,7 @@ class BitacoraView extends StatelessWidget {
           itemCount: estado.registros.length,
           itemBuilder: (context, i) {
             final registro = estado.registros[i];
-            return TarjetaRegistroBitacora(
+            return BitacoraCard(
               registro: registro, 
               estaSeleccionado: estado.registrosSeleccionados.contains(registro.id),
               // Pasamos la función de navegación directamente aquí

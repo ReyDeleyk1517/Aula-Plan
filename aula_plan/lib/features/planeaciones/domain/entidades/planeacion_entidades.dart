@@ -1,7 +1,8 @@
-
 class PlaneacionEntidad {
   final int? id;
   final int? perfilId;
+  // Optional: path to a template image asset to format the PDF
+  final String? templateImageAsset;
   final String cicloEscolar;
   final String fechaEntrega;
   final String nombreEscuela;
@@ -19,14 +20,21 @@ class PlaneacionEntidad {
   final String escenarios;
   final String metodologia;
   final String nombreProyecto;
+  final String organizacionGrupo;
+  final String espacio;
+  final String tiempo;
+  final String responsables;
+  final String evaluacionIndicadores;
+  final String evaluacionInstrumentos;
   final String observaciones;
-  
-  // Una planeación tiene múltiples fases
-  final List<FasePlaneacionEntidad> fases;
+
+  // Una planeación tiene múltiples actividades
+  final List<ActividadPlaneacionEntidad> actividades;
 
   PlaneacionEntidad({
     this.id,
     this.perfilId,
+    this.templateImageAsset,
     required this.cicloEscolar,
     required this.fechaEntrega,
     required this.nombreEscuela,
@@ -44,35 +52,30 @@ class PlaneacionEntidad {
     required this.escenarios,
     required this.metodologia,
     required this.nombreProyecto,
-    required this.observaciones,
-    this.fases = const [],
-  });
-}
-
-class FasePlaneacionEntidad {
-  final int? id;
-  final int? idPlaneacion;
-  final String fasesDesarrollo;
-  final String actividades;
-  final String materialesRecursos;
-  final String organizacionGrupo;
-  final String espacio;
-  final String tiempo;
-  final String responsables;
-  final String evaluacionIndicadores;
-  final String evaluacionInstrumentos;
-
-  FasePlaneacionEntidad({
-    this.id,
-    this.idPlaneacion,
-    required this.fasesDesarrollo,
-    required this.actividades,
-    required this.materialesRecursos,
     required this.organizacionGrupo,
     required this.espacio,
     required this.tiempo,
     required this.responsables,
     required this.evaluacionIndicadores,
     required this.evaluacionInstrumentos,
+    required this.observaciones,
+    this.actividades = const [],
+  });
+}
+
+// NUEVA: Actividad de una planeación (tabla independiente)
+class ActividadPlaneacionEntidad {
+  final int? id;
+  final int? idPlaneacion;
+  final String titulo;
+  final String descripcion;
+  final String materiales;
+
+  ActividadPlaneacionEntidad({
+    this.id,
+    this.idPlaneacion,
+    required this.titulo,
+    required this.descripcion,
+    required this.materiales,
   });
 }

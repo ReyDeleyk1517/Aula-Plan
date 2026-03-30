@@ -50,3 +50,29 @@ class ObtenerPlaneacionPorId {
     return await repositorio.obtenerPlaneacionPorId(idPlaneacion);
   }
 }
+
+// Actividades por fase
+// Actividades por planeación 
+class ObtenerActividadesPorPlaneacion {
+  final PlaneacionRepositorio repositorio;
+  ObtenerActividadesPorPlaneacion(this.repositorio);
+  Future<List<ActividadPlaneacionEntidad>> call(int idPlaneacion) async {
+    return await repositorio.obtenerActividadesPorPlaneacion(idPlaneacion);
+  }
+}
+
+class GuardarActividadesParaPlaneacion {
+  final PlaneacionRepositorio repositorio;
+  GuardarActividadesParaPlaneacion(this.repositorio);
+  Future<void> call(int idPlaneacion, List<ActividadPlaneacionEntidad> actividades) async {
+    await repositorio.insertarActividadesParaPlaneacion(idPlaneacion, actividades);
+  }
+}
+
+class ActualizarActividadesParaPlaneacion {
+  final PlaneacionRepositorio repositorio;
+  ActualizarActividadesParaPlaneacion(this.repositorio);
+  Future<void> call(int idPlaneacion, List<ActividadPlaneacionEntidad> actividades) async {
+    await repositorio.actualizarActividadesParaPlaneacion(idPlaneacion, actividades);
+  }
+}

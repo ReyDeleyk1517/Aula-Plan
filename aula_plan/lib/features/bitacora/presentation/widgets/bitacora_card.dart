@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../domain/entidades/bitacora_entidad.dart';
 
-class TarjetaRegistroBitacora extends StatelessWidget {
+class BitacoraCard extends StatelessWidget {
   final BitacoraEntidad registro;
   final VoidCallback? onTap;
   final bool estaSeleccionado;
   final VoidCallback onToggleSeleccion;
 
-  const TarjetaRegistroBitacora({
+  const BitacoraCard({
     super.key,
     required this.registro,
     this.onTap,

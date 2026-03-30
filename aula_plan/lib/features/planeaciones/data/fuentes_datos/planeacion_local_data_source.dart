@@ -9,14 +9,15 @@ abstract class PlaneacionLocalDataSource {
   Future<void> eliminar(int id);
   Future<void> actualizarCompleta(PlaneacionModelo modelo);
 
-  Future<void> actualizarFaseIndividual(FasePlaneacionModelo fase);
-  Future<void> insertarFaseIndividual(FasePlaneacionModelo fase);
+  // Nuevas: Actividades de una planeación (tabla independiente)
+  Future<List<ActividadPlaneacionModelo>> obtenerActividadesPorPlaneacion(int idPlaneacion);
+  Future<void> insertarActividadesParaPlaneacion(int idPlaneacion, List<ActividadPlaneacionModelo> actividades);
+  Future<void> actualizarActividadesParaPlaneacion(int idPlaneacion, List<ActividadPlaneacionModelo> actividades);
 }
 
 class ImplementacionPlaneacionLocalDataSource
     implements PlaneacionLocalDataSource {
   final String tablaPlaneacion = "planeacion";
-  final String tablaFases = "fases_planeacion";
 
   Future<Database> get _getDatabase async => await DbHelper().database;
 
@@ -31,13 +32,11 @@ class ImplementacionPlaneacionLocalDataSource
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Insertar fases
-      for (var fase in modelo.fases) {
-        // modelo.fases es List<FasePlaneacionModelo>
-        // pasar aMapa()
-        final mapaFase = (fase as FasePlaneacionModelo).aMapa();
-        mapaFase['id_planeacion'] = idGenerado;
-        await txn.insert(tablaFases, mapaFase);
+      // Insertar actividades asociadas a la planeación
+      for (var act in modelo.actividades) {
+        final mapaAct = (act as ActividadPlaneacionModelo).aMapa();
+        mapaAct['id_planeacion'] = idGenerado;
+        await txn.insert(DbHelper.actividadesTable, mapaAct);
       }
     });
   }
@@ -56,19 +55,18 @@ class ImplementacionPlaneacionLocalDataSource
 
     for (var mapa in mapasPlaneacion) {
       final int id = mapa['id'];
-
-      // Consultamos las fases de ESTA planeación específica
-      final List<Map<String, dynamic>> mapasFases = await db.query(
-        tablaFases,
+      // Consultamos las actividades de ESTA planeación específica
+      final List<Map<String, dynamic>> mapasActividades = await db.query(
+        DbHelper.actividadesTable,
         where: 'id_planeacion = ?',
         whereArgs: [id],
       );
 
-      final fases = mapasFases
-          .map((f) => FasePlaneacionModelo.desdeMapa(f))
+      final actividades = mapasActividades
+          .map((a) => ActividadPlaneacionModelo.desdeMapa(a))
           .toList();
 
-      listaCompleta.add(PlaneacionModelo.desdeMapa(mapa, fases: fases));
+      listaCompleta.add(PlaneacionModelo.desdeMapa(mapa, actividades: actividades));
     }
 
     return listaCompleta;
@@ -86,16 +84,15 @@ class ImplementacionPlaneacionLocalDataSource
 
     if (res.isEmpty) return null;
 
-    final List<Map<String, dynamic>> mapasFases = await db.query(
-      tablaFases,
+    final List<Map<String, dynamic>> mapasActividades = await db.query(
+      DbHelper.actividadesTable,
       where: 'id_planeacion = ?',
       whereArgs: [id],
     );
-
-    final fases = mapasFases
-        .map((f) => FasePlaneacionModelo.desdeMapa(f))
+    final actividades = mapasActividades
+        .map((a) => ActividadPlaneacionModelo.desdeMapa(a))
         .toList();
-    return PlaneacionModelo.desdeMapa(res.first, fases: fases);
+    return PlaneacionModelo.desdeMapa(res.first, actividades: actividades);
   }
 
   @override
@@ -111,23 +108,19 @@ class ImplementacionPlaneacionLocalDataSource
         whereArgs: [modelo.id],
       );
 
-      // Borrar fases antiguas (para evitar duplicados o huerfanos)
+      // Borrar actividades antiguas para evitar duplicados
       await txn.delete(
-        tablaFases,
+        DbHelper.actividadesTable,
         where: 'id_planeacion = ?',
         whereArgs: [modelo.id],
       );
-
-      // insertar fases
-      for (var fase in modelo.fases) {
-
-        final faseModelo = fase as FasePlaneacionModelo;
-        final mapaFase = faseModelo.aMapa();
-
-        mapaFase['id'] = faseModelo.id;
-        mapaFase['id_planeacion'] = modelo.id; // asegurar el vínculo a la planeacion
-
-        await txn.insert(tablaFases, mapaFase);
+      // insertar actividades
+      for (var a in modelo.actividades) {
+        final acto = a as ActividadPlaneacionModelo;
+        final mapaActividad = acto.aMapa();
+        mapaActividad['id'] = acto.id;
+        mapaActividad['id_planeacion'] = modelo.id; // asegurar el vínculo a la planeacion
+        await txn.insert(DbHelper.actividadesTable, mapaActividad);
       }
     });
   }
@@ -138,25 +131,41 @@ class ImplementacionPlaneacionLocalDataSource
 
     await db.delete(tablaPlaneacion, where: 'id = ?', whereArgs: [id]);
   }
-
+  
   @override
-  Future<void> actualizarFaseIndividual(FasePlaneacionModelo fase) async {
+  Future<List<ActividadPlaneacionModelo>> obtenerActividadesPorPlaneacion(int idPlaneacion) async {
     final db = await _getDatabase;
-    await db.update(
-      tablaFases,
-      fase.aMapa(),
-      where: 'id = ?',
-      whereArgs: [fase.id],
+    final List<Map<String, dynamic>> res = await db.query(
+      DbHelper.actividadesTable,
+      where: 'id_planeacion = ?',
+      whereArgs: [idPlaneacion],
     );
+    return res.map((m) => ActividadPlaneacionModelo.desdeMapa(m)).toList();
   }
 
   @override
-  Future<void> insertarFaseIndividual(FasePlaneacionModelo fase) async {
+  Future<void> insertarActividadesParaPlaneacion(int idPlaneacion, List<ActividadPlaneacionModelo> actividades) async {
     final db = await _getDatabase;
-    await db.insert(
-      tablaFases,
-      fase.aMapa(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.transaction((txn) async {
+      for (final a in actividades) {
+        final mapa = a.aMapa();
+        mapa['id_planeacion'] = idPlaneacion;
+        await txn.insert(DbHelper.actividadesTable, mapa,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+    });
+  }
+
+  @override
+  Future<void> actualizarActividadesParaPlaneacion(int idPlaneacion, List<ActividadPlaneacionModelo> actividades) async {
+    final db = await _getDatabase;
+    await db.transaction((txn) async {
+      await txn.delete(DbHelper.actividadesTable, where: 'id_planeacion = ?', whereArgs: [idPlaneacion]);
+      for (final a in actividades) {
+        final mapa = a.aMapa();
+        mapa['id_planeacion'] = idPlaneacion;
+        await txn.insert(DbHelper.actividadesTable, mapa, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+    });
   }
 }

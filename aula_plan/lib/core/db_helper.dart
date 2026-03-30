@@ -26,6 +26,7 @@ class DbHelper {
   static const String recursosTable = 'recursos_docentes';
   static const String planeacionTable = 'planeacion';
   static const String fasesPlaneacionTable = 'fases_planeacion';
+  static const String actividadesTable = 'actividades_planeacion';
   static const String eventoTable = 'evento';
 
   Future<Database> _initDatabase() async {
@@ -101,25 +102,25 @@ class DbHelper {
             escenarios TEXT,
             metodologia TEXT,
             nombre_proyecto TEXT,
-            observaciones TEXT,
-            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
-          )
-        ''');
-
-        // --- Tabla Fases Planeación ---
-        await db.execute('''
-          CREATE TABLE $fasesPlaneacionTable (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            id_planeacion INTEGER,
-            fases_desarrollo TEXT,
-            actividades TEXT,
-            materiales_recursos TEXT,
             organizacion_grupo TEXT,
             espacio TEXT,
             tiempo TEXT,
             responsables TEXT,
             evaluacion_indicadores TEXT,
             evaluacion_instrumentos TEXT,
+            observaciones TEXT,
+            FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
+          )
+        ''');
+
+        // --- Tabla Actividades Planeacion ---
+        await db.execute('''
+          CREATE TABLE $actividadesTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_planeacion INTEGER,
+            titulo TEXT,
+            descripcion TEXT,
+            materiales TEXT,
             FOREIGN KEY (id_planeacion) REFERENCES $planeacionTable(id) ON DELETE CASCADE
           )
         ''');
@@ -146,7 +147,7 @@ class DbHelper {
     );
   }
 
-  // Métodos de utilidad existentes
+  // Métodos de utilidad
   Future<bool> existePerfil() async {
     final db = await database;
     final List<Map<String, dynamic>> x = await db.rawQuery('SELECT COUNT(*) FROM $perfilTable');

@@ -1,3 +1,9 @@
+// Calendario Escolar
+import 'package:aula_plan/features/calendario_escolar/data/fuentes_datos/evento_local_data_source.dart';
+import 'package:aula_plan/features/calendario_escolar/data/repositorios/evento_implementacion_repositorio.dart';
+import 'package:aula_plan/features/calendario_escolar/domain/casos_uso/evento_casos_uso.dart';
+import 'package:aula_plan/features/calendario_escolar/domain/repositorios/evento_repositorio.dart';
+
 // Recursos
 import 'package:aula_plan/features/recursos_docentes/data/fuentes_datos/recurso_docente_local_data_source.dart';
 import 'package:aula_plan/features/recursos_docentes/data/repositorios/recurso_docente_implementacion_repositorio.dart';
@@ -120,6 +126,7 @@ Future<void> init() async {
   // MODULO: PLANEACIONES
   // ===========================================================================
 
+  // Presentation (Cubits/Blocs)
   sl.registerFactory(
     () => PlaneacionCrearEditarCubit(guardarPlaneacion: sl(), editarPlaneacion: sl()),
   );
@@ -127,16 +134,38 @@ Future<void> init() async {
     () => PlaneacionCubit(obtenerPlaneaciones: sl(), eliminarPlaneacion: sl()),
   );
 
+  // Domain (Use Cases)
   sl.registerLazySingleton(() => GuardarPlaneacion(sl()));
   sl.registerLazySingleton(() => EditarPlaneacion(sl()));
   sl.registerLazySingleton(() => ObtenerPlaneaciones(sl()));
   sl.registerLazySingleton(() => EliminarPlaneacion(sl()));
 
+  // Data (Repositorios y Data Sources)
   sl.registerLazySingleton<PlaneacionRepositorio>(
     () => PlaneacionImplementacionRepositorio(fuenteDatosLocal: sl()),
   );
 
   sl.registerLazySingleton<PlaneacionLocalDataSource>(
     () => ImplementacionPlaneacionLocalDataSource(),
+  );
+
+  // ===========================================================================
+  // MODULO: CALENDARIO ESCOLAR
+  // ===========================================================================
+
+
+  // Domain (Use Cases)
+  sl.registerLazySingleton(() => GuardarEvento(sl()));
+  sl.registerLazySingleton(() => EditarEvento(sl()));
+  sl.registerLazySingleton(() => ObtenerEventos(sl()));
+  sl.registerLazySingleton(() => eliminarEvento(sl()));
+
+  // Data (Repositorios y Data Sources)
+  sl.registerLazySingleton<EventoRepositorio>(
+    () => EventoImplementacionRepositorio(fuenteDatosLocal: sl()),
+  );
+
+  sl.registerLazySingleton<EventoLocalDataSource>(
+    () => ImplementacionEventoLocalDataSource(),
   );
 }

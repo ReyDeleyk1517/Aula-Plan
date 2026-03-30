@@ -22,32 +22,44 @@ class PlaneacionModelo extends PlaneacionEntidad {
     required String metodologia,
     required String nombreProyecto,
     required String observaciones,
-    List<FasePlaneacionModelo> fases = const [],
+    required String organizacionGrupo,
+    required String espacio,
+    required String tiempo,
+    required String responsables,
+    required String evaluacionIndicadores,
+    required String evaluacionInstrumentos,
+    List<ActividadPlaneacionModelo> actividades = const [],
   }) : super(
-          id: id,
-          perfilId: perfilId,
-          cicloEscolar: cicloEscolar,
-          fechaEntrega: fechaEntrega,
-          nombreEscuela: nombreEscuela,
-          nivelEducativo: nivelEducativo,
-          faseEducativa: faseEducativa,
-          grupo: grupo,
-          condicionAlumnado: condicionAlumnado,
-          temporalidad: temporalidad,
-          necesidadesBap: necesidadesBap,
-          disciplina: disciplina,
-          camposFormativos: camposFormativos,
-          contenidos: contenidos,
-          pda: pda,
-          ejesArticuladores: ejesArticuladores,
-          escenarios: escenarios,
-          metodologia: metodologia,
-          nombreProyecto: nombreProyecto,
-          observaciones: observaciones,
-          fases: fases,
-        );
+            id: id,
+            perfilId: perfilId,
+            cicloEscolar: cicloEscolar,
+            fechaEntrega: fechaEntrega,
+            nombreEscuela: nombreEscuela,
+            nivelEducativo: nivelEducativo,
+            faseEducativa: faseEducativa,
+            grupo: grupo,
+            condicionAlumnado: condicionAlumnado,
+            temporalidad: temporalidad,
+            necesidadesBap: necesidadesBap,
+            disciplina: disciplina,
+            camposFormativos: camposFormativos,
+            contenidos: contenidos,
+            pda: pda,
+            ejesArticuladores: ejesArticuladores,
+            escenarios: escenarios,
+            metodologia: metodologia,
+            nombreProyecto: nombreProyecto,
+            observaciones: observaciones,
+            organizacionGrupo: organizacionGrupo,
+            espacio: espacio,
+            tiempo: tiempo,
+            responsables: responsables,
+            evaluacionIndicadores: evaluacionIndicadores,
+            evaluacionInstrumentos: evaluacionInstrumentos,
+            actividades: actividades,
+          );
 
-  factory PlaneacionModelo.desdeMapa(Map<String, dynamic> mapa, {List<FasePlaneacionModelo> fases = const []}) {
+  factory PlaneacionModelo.desdeMapa(Map<String, dynamic> mapa, {List<ActividadPlaneacionModelo> actividades = const []}) {
     return PlaneacionModelo(
       id: mapa['id'],
       perfilId: mapa['perfil_id'],
@@ -69,7 +81,13 @@ class PlaneacionModelo extends PlaneacionEntidad {
       metodologia: mapa['metodologia'],
       nombreProyecto: mapa['nombre_proyecto'],
       observaciones: mapa['observaciones'],
-      fases: fases,
+      organizacionGrupo: mapa['organizacion_grupo'],
+      espacio: mapa['espacio'],
+      tiempo: mapa['tiempo'],
+      responsables: mapa['responsables'],
+      evaluacionIndicadores: mapa['evaluacion_indicadores'],
+      evaluacionInstrumentos: mapa['evaluacion_instrumentos'],
+      actividades: actividades,
     );
   }
 
@@ -95,6 +113,12 @@ class PlaneacionModelo extends PlaneacionEntidad {
       'metodologia': metodologia,
       'nombre_proyecto': nombreProyecto,
       'observaciones': observaciones,
+      'organizacion_grupo': organizacionGrupo,
+      'espacio': espacio,
+      'tiempo': tiempo,
+      'responsables': responsables,
+      'evaluacion_indicadores': evaluacionIndicadores,
+      'evaluacion_instrumentos': evaluacionInstrumentos,
     };
   }
 
@@ -120,56 +144,44 @@ class PlaneacionModelo extends PlaneacionEntidad {
       metodologia: entidad.metodologia,
       nombreProyecto: entidad.nombreProyecto,
       observaciones: entidad.observaciones,
-      // Mapear fases
-      fases: entidad.fases.map((f) => FasePlaneacionModelo.fromEntity(f)).toList(),
+      organizacionGrupo: entidad.organizacionGrupo,
+      espacio: entidad.espacio,
+      tiempo: entidad.tiempo,
+      responsables: entidad.responsables,
+      evaluacionIndicadores: entidad.evaluacionIndicadores,
+      evaluacionInstrumentos: entidad.evaluacionInstrumentos,
+      // Mapear actividades
+      actividades: entidad.actividades.map((a) => ActividadPlaneacionModelo.fromEntity(a)).toList(),
     );
   }
 }
 
 //==================================
-// FASES DE PLANEACIONES
+// ACTIVIDADES DE PLANEACIÓN (Modelo)
 //==================================
 
-class FasePlaneacionModelo extends FasePlaneacionEntidad {
-  FasePlaneacionModelo({
+class ActividadPlaneacionModelo extends ActividadPlaneacionEntidad {
+  ActividadPlaneacionModelo({
     int? id,
     int? idPlaneacion,
-    required String fasesDesarrollo,
-    required String actividades,
-    required String materialesRecursos,
-    required String organizacionGrupo,
-    required String espacio,
-    required String tiempo,
-    required String responsables,
-    required String evaluacionIndicadores,
-    required String evaluacionInstrumentos,
+    required String titulo,
+    required String descripcion,
+    required String materiales,
   }) : super(
           id: id,
           idPlaneacion: idPlaneacion,
-          fasesDesarrollo: fasesDesarrollo,
-          actividades: actividades,
-          materialesRecursos: materialesRecursos,
-          organizacionGrupo: organizacionGrupo,
-          espacio: espacio,
-          tiempo: tiempo,
-          responsables: responsables,
-          evaluacionIndicadores: evaluacionIndicadores,
-          evaluacionInstrumentos: evaluacionInstrumentos,
+          titulo: titulo,
+          descripcion: descripcion,
+          materiales: materiales,
         );
 
-  factory FasePlaneacionModelo.desdeMapa(Map<String, dynamic> mapa) {
-    return FasePlaneacionModelo(
+  factory ActividadPlaneacionModelo.desdeMapa(Map<String, dynamic> mapa) {
+    return ActividadPlaneacionModelo(
       id: mapa['id'],
       idPlaneacion: mapa['id_planeacion'],
-      fasesDesarrollo: mapa['fases_desarrollo'],
-      actividades: mapa['actividades'],
-      materialesRecursos: mapa['materiales_recursos'],
-      organizacionGrupo: mapa['organizacion_grupo'],
-      espacio: mapa['espacio'],
-      tiempo: mapa['tiempo'],
-      responsables: mapa['responsables'],
-      evaluacionIndicadores: mapa['evaluacion_indicadores'],
-      evaluacionInstrumentos: mapa['evaluacion_instrumentos'],
+      titulo: mapa['titulo'],
+      descripcion: mapa['descripcion'],
+      materiales: mapa['materiales'],
     );
   }
 
@@ -177,32 +189,19 @@ class FasePlaneacionModelo extends FasePlaneacionEntidad {
     return {
       'id': id,
       'id_planeacion': idPlaneacion,
-      'fases_desarrollo': fasesDesarrollo,
-      'actividades': actividades,
-      'materiales_recursos': materialesRecursos,
-      'organizacion_grupo': organizacionGrupo,
-      'espacio': espacio,
-      'tiempo': tiempo,
-      'responsables': responsables,
-      'evaluacion_indicadores': evaluacionIndicadores,
-      'evaluacion_instrumentos': evaluacionInstrumentos,
+      'titulo': titulo,
+      'descripcion': descripcion,
+      'materiales': materiales,
     };
   }
 
-  factory FasePlaneacionModelo.fromEntity(FasePlaneacionEntidad entidad) {
-    return FasePlaneacionModelo(
+  factory ActividadPlaneacionModelo.fromEntity(ActividadPlaneacionEntidad entidad) {
+    return ActividadPlaneacionModelo(
       id: entidad.id,
       idPlaneacion: entidad.idPlaneacion,
-      fasesDesarrollo: entidad.fasesDesarrollo,
-      actividades: entidad.actividades,
-      materialesRecursos: entidad.materialesRecursos,
-      organizacionGrupo: entidad.organizacionGrupo,
-      espacio: entidad.espacio,
-      tiempo: entidad.tiempo,
-      responsables: entidad.responsables,
-      evaluacionIndicadores: entidad.evaluacionIndicadores,
-      evaluacionInstrumentos: entidad.evaluacionInstrumentos,
+      titulo: entidad.titulo,
+      descripcion: entidad.descripcion,
+      materiales: entidad.materiales,
     );
   }
-  
 }

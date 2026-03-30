@@ -17,13 +17,13 @@ import 'package:aula_plan/features/bitacora/presentation/bloc/bitacora_cubit.dar
 import 'package:aula_plan/features/bitacora/presentation/paginas/bitacora_view.dart';
 
 import 'dart:io'; // detectar la plataforma
-import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Importar FFI para sqlite windows
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // FFI para sqlite windows
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // --- AGREGAR ESTO PARA WINDOWS ---
+    // Codigo para ejecutar en windows
     if (Platform.isWindows || Platform.isLinux) {
       // Inicializar FFI para bases de datos en escritorio
       sqfliteFfiInit();
