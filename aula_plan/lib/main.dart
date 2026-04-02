@@ -9,16 +9,20 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/injection_container.dart' as di;
 import 'core/injection_container.dart';
 
-import 'package:aula_plan/core/db_helper.dart'; 
+import 'package:aula_plan/core/db_helper.dart';
 
 import 'package:aula_plan/features/Perfil/presentation/paginas/perfil_form_view.dart';
 import 'package:aula_plan/features/Perfil/presentation/paginas/perfil_view.dart';
 import 'package:aula_plan/features/bitacora/presentation/bloc/bitacora_cubit.dart';
 import 'package:aula_plan/features/bitacora/presentation/paginas/bitacora_view.dart';
+import 'package:aula_plan/features/calendario_escolar/presentation/paginas/calendario_view.dart';
 
 import 'dart:io'; // detectar la plataforma
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // FFI para sqlite windows
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart' as p;
 
+late String rutadb;
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
@@ -33,29 +37,31 @@ void main() async {
     // ---------------------------------
 
     // Inicializar dependencias (GetIt)
-    await di.init(); 
-    
+    await di.init();
+
     // Inicializar la base de datos
     await DbHelper().initDatabase();
-    
+
     await initializeDateFormatting('es_ES', null);
+    rutadb = p.join(await getDatabasesPath(), 'database_docente.db');
 
     runApp(const MainApp());
   } catch (e) {
     debugPrint("Error durante el arranque: $e");
-    runApp(const MainApp()); 
+    runApp(const MainApp());
   }
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key}); 
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => sl<BitacoraCubit>()..cargarRegistros(DateTime.now()),
+          create: (context) =>
+              sl<BitacoraCubit>()..cargarRegistros(DateTime.now()),
         ),
         BlocProvider(
           create: (context) => sl<RecursosDocenteCubit>()..cargarRecursos(),
@@ -69,9 +75,7 @@ class MainApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
-          Locale('es', 'ES'),
-        ],
+        supportedLocales: const [Locale('es', 'ES')],
         theme: ThemeData(
           useMaterial3: true,
           colorSchemeSeed: const Color(0xFF6366F1),
@@ -136,7 +140,10 @@ class _AppStartState extends State<AppStart> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 20),
-            Text("Iniciando Aula Plan...", style: TextStyle(color: Colors.grey)),
+            Text(
+              "Iniciando Aula Plan...",
+              style: TextStyle(color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -144,17 +151,14 @@ class _AppStartState extends State<AppStart> {
   }
 }
 
-// MENÚ PRINCIPAL 
+// MENÚ PRINCIPAL
 class MenuPrincipal extends StatelessWidget {
   const MenuPrincipal({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aula Plan - USAER'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Aula Plan - USAER'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(
@@ -181,7 +185,7 @@ class MenuPrincipal extends StatelessWidget {
               titulo: 'Calendario',
               icono: Icons.calendar_month_rounded,
               color: Colors.redAccent,
-              destino: const PlaceholderView(titulo: 'Calendario', color: Colors.redAccent),
+              destino: const EventoView(),
             ),
             _crearBotonModulo(
               context,
@@ -195,7 +199,27 @@ class MenuPrincipal extends StatelessWidget {
               titulo: 'Perfil',
               icono: Icons.person_rounded,
               color: Colors.orange,
-              destino: const PerfilView(), 
+              destino: const PerfilView(),
+            ),
+            Card(
+              child: InkWell(
+                onTap: () => _modalRutaBD(context, rutadb),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.abc),
+                    const SizedBox(height: 10),
+                    Text(
+                      "ruta",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -203,26 +227,45 @@ class MenuPrincipal extends StatelessWidget {
     );
   }
 
-  Widget _crearBotonModulo(BuildContext context, 
-      {required String titulo, required IconData icono, required Color color, required Widget destino}) {
+  Widget _crearBotonModulo(
+    BuildContext context, {
+    required String titulo,
+    required IconData icono,
+    required Color color,
+    required Widget destino,
+  }) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => destino)),
+        onTap: () =>
+            Navigator.push(context, MaterialPageRoute(builder: (_) => destino)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icono, size: 50, color: color),
             const SizedBox(height: 10),
-            Text(titulo, 
+            Text(
+              titulo,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _modalRutaBD(BuildContext context, String ruta) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Nombre del archivo"),
+          content: Text(ruta),
+        );
+      },
     );
   }
 }
@@ -251,7 +294,10 @@ class PlaceholderView extends StatelessWidget {
               'Módulo de $titulo',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const Text('Próximamente disponible', style: TextStyle(color: Colors.grey)),
+            const Text(
+              'Próximamente disponible',
+              style: TextStyle(color: Colors.grey),
+            ),
           ],
         ),
       ),

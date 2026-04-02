@@ -14,7 +14,10 @@ class PlaneacionEntidad {
   final String necesidadesBap;
   final String disciplina;
   final String camposFormativos;
-  final String contenidos;
+  final String contenidos_lenguaje;
+  final String contenidos_saberes_y_pensamiento_cientifico;
+  final String contenidos_de_lo_humano_y_comunitario;
+  final String contenidos_etica_naturaleza_y_sociedad;
   final String pda;
   final String ejesArticuladores;
   final String escenarios;
@@ -46,7 +49,10 @@ class PlaneacionEntidad {
     required this.necesidadesBap,
     required this.disciplina,
     required this.camposFormativos,
-    required this.contenidos,
+    required this.contenidos_lenguaje,
+    required this.contenidos_saberes_y_pensamiento_cientifico,
+    required this.contenidos_de_lo_humano_y_comunitario,
+    required this.contenidos_etica_naturaleza_y_sociedad,
     required this.pda,
     required this.ejesArticuladores,
     required this.escenarios,

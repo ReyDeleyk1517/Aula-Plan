@@ -31,7 +31,7 @@ class DbHelper {
 
   Future<Database> _initDatabase() async {
     final ruta = join(await getDatabasesPath(), 'database_docente.db');
-    
+
     return await openDatabase(
       ruta,
       version: 1,
@@ -96,7 +96,10 @@ class DbHelper {
             necesidades_bap TEXT,
             disciplina TEXT,
             campos_formativos TEXT,
-            contenidos TEXT,
+            contenidos_lenguaje TEXT,
+            contenidos_saberes_y_pensamiento_cientifico TEXT,
+            contenidos_de_lo_humano_y_comunitario TEXT,
+            contenidos_etica_naturaleza_y_sociedad TEXT,
             pda TEXT,
             ejes_articuladores TEXT,
             escenarios TEXT,
@@ -150,14 +153,19 @@ class DbHelper {
   // Métodos de utilidad
   Future<bool> existePerfil() async {
     final db = await database;
-    final List<Map<String, dynamic>> x = await db.rawQuery('SELECT COUNT(*) FROM $perfilTable');
+    final List<Map<String, dynamic>> x = await db.rawQuery(
+      'SELECT COUNT(*) FROM $perfilTable',
+    );
     int? count = Sqflite.firstIntValue(x);
     return (count ?? 0) > 0;
   }
 
   Future<int?> obtenerPerfilId() async {
     final db = await database;
-    final List<Map<String, dynamic>> res = await db.query(perfilTable, limit: 1);
+    final List<Map<String, dynamic>> res = await db.query(
+      perfilTable,
+      limit: 1,
+    );
     if (res.isNotEmpty) {
       return res.first['id'] as int;
     }

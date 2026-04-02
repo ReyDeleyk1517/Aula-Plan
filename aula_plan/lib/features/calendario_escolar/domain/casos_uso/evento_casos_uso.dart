@@ -33,10 +33,10 @@ class EditarEvento {
   }
 }
 
-class eliminarEvento {
+class EliminarEvento {
   final EventoRepositorio repositorio; 
 
-  eliminarEvento(this.repositorio);
+  EliminarEvento(this.repositorio);
 
   Future<void> call(int id) async {
     return await repositorio.eliminarEvento(id); 

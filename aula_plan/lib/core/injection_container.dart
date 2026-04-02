@@ -1,6 +1,8 @@
 // Calendario Escolar
 import 'package:aula_plan/features/calendario_escolar/data/fuentes_datos/evento_local_data_source.dart';
 import 'package:aula_plan/features/calendario_escolar/data/repositorios/evento_implementacion_repositorio.dart';
+import 'package:aula_plan/features/calendario_escolar/presentation/bloc/evento_crear_editar_cubit.dart';
+import 'package:aula_plan/features/calendario_escolar/presentation/bloc/evento_cubit.dart';
 import 'package:aula_plan/features/calendario_escolar/domain/casos_uso/evento_casos_uso.dart';
 import 'package:aula_plan/features/calendario_escolar/domain/repositorios/evento_repositorio.dart';
 
@@ -128,7 +130,10 @@ Future<void> init() async {
 
   // Presentation (Cubits/Blocs)
   sl.registerFactory(
-    () => PlaneacionCrearEditarCubit(guardarPlaneacion: sl(), editarPlaneacion: sl()),
+    () => PlaneacionCrearEditarCubit(
+      guardarPlaneacion: sl(),
+      editarPlaneacion: sl(),
+    ),
   );
   sl.registerFactory(
     () => PlaneacionCubit(obtenerPlaneaciones: sl(), eliminarPlaneacion: sl()),
@@ -153,12 +158,11 @@ Future<void> init() async {
   // MODULO: CALENDARIO ESCOLAR
   // ===========================================================================
 
-
   // Domain (Use Cases)
   sl.registerLazySingleton(() => GuardarEvento(sl()));
   sl.registerLazySingleton(() => EditarEvento(sl()));
   sl.registerLazySingleton(() => ObtenerEventos(sl()));
-  sl.registerLazySingleton(() => eliminarEvento(sl()));
+  sl.registerLazySingleton(() => EliminarEvento(sl()));
 
   // Data (Repositorios y Data Sources)
   sl.registerLazySingleton<EventoRepositorio>(
@@ -167,5 +171,17 @@ Future<void> init() async {
 
   sl.registerLazySingleton<EventoLocalDataSource>(
     () => ImplementacionEventoLocalDataSource(),
+  );
+
+  // Calendario Escolar: Cubit (presentación) Setup
+  sl.registerFactory(
+    () => EventoCubit(obtenerEventos: sl(), eliminarEvento: sl()),
+  );
+
+  sl.registerFactory(
+    () => EventoCrearEditarCubit(
+      guardarEvento: sl(), 
+      editarEvento: sl()
+    ),
   );
 }

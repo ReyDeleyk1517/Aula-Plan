@@ -15,7 +15,10 @@ class PlaneacionModelo extends PlaneacionEntidad {
     required String necesidadesBap,
     required String disciplina,
     required String camposFormativos,
-    required String contenidos,
+    required String contenidos_lenguaje,
+    required String contenidos_saberes_y_pensamiento_cientifico,
+    required String contenidos_de_lo_humano_y_comunitario,
+    required String contenidos_etica_naturaleza_y_sociedad,
     required String pda,
     required String ejesArticuladores,
     required String escenarios,
@@ -30,36 +33,45 @@ class PlaneacionModelo extends PlaneacionEntidad {
     required String evaluacionInstrumentos,
     List<ActividadPlaneacionModelo> actividades = const [],
   }) : super(
-            id: id,
-            perfilId: perfilId,
-            cicloEscolar: cicloEscolar,
-            fechaEntrega: fechaEntrega,
-            nombreEscuela: nombreEscuela,
-            nivelEducativo: nivelEducativo,
-            faseEducativa: faseEducativa,
-            grupo: grupo,
-            condicionAlumnado: condicionAlumnado,
-            temporalidad: temporalidad,
-            necesidadesBap: necesidadesBap,
-            disciplina: disciplina,
-            camposFormativos: camposFormativos,
-            contenidos: contenidos,
-            pda: pda,
-            ejesArticuladores: ejesArticuladores,
-            escenarios: escenarios,
-            metodologia: metodologia,
-            nombreProyecto: nombreProyecto,
-            observaciones: observaciones,
-            organizacionGrupo: organizacionGrupo,
-            espacio: espacio,
-            tiempo: tiempo,
-            responsables: responsables,
-            evaluacionIndicadores: evaluacionIndicadores,
-            evaluacionInstrumentos: evaluacionInstrumentos,
-            actividades: actividades,
-          );
+         id: id,
+         perfilId: perfilId,
+         cicloEscolar: cicloEscolar,
+         fechaEntrega: fechaEntrega,
+         nombreEscuela: nombreEscuela,
+         nivelEducativo: nivelEducativo,
+         faseEducativa: faseEducativa,
+         grupo: grupo,
+         condicionAlumnado: condicionAlumnado,
+         temporalidad: temporalidad,
+         necesidadesBap: necesidadesBap,
+         disciplina: disciplina,
+         camposFormativos: camposFormativos,
+         contenidos_lenguaje: contenidos_lenguaje,
+         contenidos_saberes_y_pensamiento_cientifico:
+             contenidos_saberes_y_pensamiento_cientifico,
+         contenidos_de_lo_humano_y_comunitario:
+             contenidos_de_lo_humano_y_comunitario,
+         contenidos_etica_naturaleza_y_sociedad:
+             contenidos_etica_naturaleza_y_sociedad,
+         pda: pda,
+         ejesArticuladores: ejesArticuladores,
+         escenarios: escenarios,
+         metodologia: metodologia,
+         nombreProyecto: nombreProyecto,
+         observaciones: observaciones,
+         organizacionGrupo: organizacionGrupo,
+         espacio: espacio,
+         tiempo: tiempo,
+         responsables: responsables,
+         evaluacionIndicadores: evaluacionIndicadores,
+         evaluacionInstrumentos: evaluacionInstrumentos,
+         actividades: actividades,
+       );
 
-  factory PlaneacionModelo.desdeMapa(Map<String, dynamic> mapa, {List<ActividadPlaneacionModelo> actividades = const []}) {
+  factory PlaneacionModelo.desdeMapa(
+    Map<String, dynamic> mapa, {
+    List<ActividadPlaneacionModelo> actividades = const [],
+  }) {
     return PlaneacionModelo(
       id: mapa['id'],
       perfilId: mapa['perfil_id'],
@@ -74,7 +86,13 @@ class PlaneacionModelo extends PlaneacionEntidad {
       necesidadesBap: mapa['necesidades_bap'],
       disciplina: mapa['disciplina'],
       camposFormativos: mapa['campos_formativos'],
-      contenidos: mapa['contenidos'],
+      contenidos_lenguaje: mapa['contenidos_lenguaje'],
+      contenidos_saberes_y_pensamiento_cientifico:
+          mapa['contenidos_saberes_y_pensamiento_cientifico'],
+      contenidos_de_lo_humano_y_comunitario:
+          mapa['contenidos_de_lo_humano_y_comunitario'],
+      contenidos_etica_naturaleza_y_sociedad:
+          mapa['contenidos_etica_naturaleza_y_sociedad'],
       pda: mapa['pda'],
       ejesArticuladores: mapa['ejes_articuladores'],
       escenarios: mapa['escenarios'],
@@ -106,7 +124,13 @@ class PlaneacionModelo extends PlaneacionEntidad {
       'necesidades_bap': necesidadesBap,
       'disciplina': disciplina,
       'campos_formativos': camposFormativos,
-      'contenidos': contenidos,
+      'contenidos_lenguaje': contenidos_lenguaje,
+      'contenidos_saberes_y_pensamiento_cientifico':
+          contenidos_saberes_y_pensamiento_cientifico,
+      'contenidos_de_lo_humano_y_comunitario':
+          contenidos_de_lo_humano_y_comunitario,
+      'contenidos_etica_naturaleza_y_sociedad':
+          contenidos_etica_naturaleza_y_sociedad,
       'pda': pda,
       'ejes_articuladores': ejesArticuladores,
       'escenarios': escenarios,
@@ -137,7 +161,13 @@ class PlaneacionModelo extends PlaneacionEntidad {
       necesidadesBap: entidad.necesidadesBap,
       disciplina: entidad.disciplina,
       camposFormativos: entidad.camposFormativos,
-      contenidos: entidad.contenidos,
+      contenidos_lenguaje: entidad.contenidos_lenguaje,
+      contenidos_saberes_y_pensamiento_cientifico:
+          entidad.contenidos_saberes_y_pensamiento_cientifico,
+      contenidos_de_lo_humano_y_comunitario:
+          entidad.contenidos_de_lo_humano_y_comunitario,
+      contenidos_etica_naturaleza_y_sociedad:
+          entidad.contenidos_etica_naturaleza_y_sociedad,
       pda: entidad.pda,
       ejesArticuladores: entidad.ejesArticuladores,
       escenarios: entidad.escenarios,
@@ -151,7 +181,9 @@ class PlaneacionModelo extends PlaneacionEntidad {
       evaluacionIndicadores: entidad.evaluacionIndicadores,
       evaluacionInstrumentos: entidad.evaluacionInstrumentos,
       // Mapear actividades
-      actividades: entidad.actividades.map((a) => ActividadPlaneacionModelo.fromEntity(a)).toList(),
+      actividades: entidad.actividades
+          .map((a) => ActividadPlaneacionModelo.fromEntity(a))
+          .toList(),
     );
   }
 }
@@ -168,12 +200,12 @@ class ActividadPlaneacionModelo extends ActividadPlaneacionEntidad {
     required String descripcion,
     required String materiales,
   }) : super(
-          id: id,
-          idPlaneacion: idPlaneacion,
-          titulo: titulo,
-          descripcion: descripcion,
-          materiales: materiales,
-        );
+         id: id,
+         idPlaneacion: idPlaneacion,
+         titulo: titulo,
+         descripcion: descripcion,
+         materiales: materiales,
+       );
 
   factory ActividadPlaneacionModelo.desdeMapa(Map<String, dynamic> mapa) {
     return ActividadPlaneacionModelo(
@@ -195,7 +227,9 @@ class ActividadPlaneacionModelo extends ActividadPlaneacionEntidad {
     };
   }
 
-  factory ActividadPlaneacionModelo.fromEntity(ActividadPlaneacionEntidad entidad) {
+  factory ActividadPlaneacionModelo.fromEntity(
+    ActividadPlaneacionEntidad entidad,
+  ) {
     return ActividadPlaneacionModelo(
       id: entidad.id,
       idPlaneacion: entidad.idPlaneacion,

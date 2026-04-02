@@ -9,25 +9,34 @@ import 'package:flutter/services.dart' show rootBundle;
 final sl = GetIt.instance;
 
 class PlaneacionServicioPdf {
-
-  
-
-  static Future<Uint8List> generarPdfPlaneacion(PlaneacionEntidad planeacion) async {
+  static Future<Uint8List> generarPdfPlaneacion(
+    PlaneacionEntidad planeacion,
+  ) async {
     final pdf = pw.Document();
 
     //logo
-    final ByteData bytes = await rootBundle.load('assets/images/logo_secretaria.jpg');
+    final ByteData bytes = await rootBundle.load(
+      'assets/images/logo_secretaria.jpg',
+    );
     final Uint8List logoBytes = bytes.buffer.asUint8List();
     final pw.MemoryImage logoImagen = pw.MemoryImage(logoBytes);
 
     final obtenerPerfil = sl<ObtenerRegistrosPerfil>();
     final listaPerfiles = await obtenerPerfil();
     final perfil = listaPerfiles.isNotEmpty ? listaPerfiles.first : null;
-    final nombreDocente = perfil != null ? "${perfil.nombre} ${perfil.apellidos}".toUpperCase() : "NOMBRE DEL DOCENTE";
+    final nombreDocente = perfil != null
+        ? "${perfil.nombre} ${perfil.apellidos}".toUpperCase()
+        : "NOMBRE DEL DOCENTE";
 
-    final estiloTitulo = pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold);
+    final estiloTitulo = pw.TextStyle(
+      fontSize: 10,
+      fontWeight: pw.FontWeight.bold,
+    );
     final estiloCelda = pw.TextStyle(fontSize: 7);
-    final estiloSigla = pw.TextStyle(fontSize: 6, fontWeight: pw.FontWeight.bold);
+    final estiloSigla = pw.TextStyle(
+      fontSize: 6,
+      fontWeight: pw.FontWeight.bold,
+    );
 
     pdf.addPage(
       pw.MultiPage(
@@ -38,7 +47,11 @@ class PlaneacionServicioPdf {
           pw.Positioned(
             right: 0,
             top: 0,
-            child: pw.Image(logoImagen, width: 100, height: 100), // Ajusta el tamaño según necesites
+            child: pw.Image(
+              logoImagen,
+              width: 100,
+              height: 100,
+            ), // Ajusta el tamaño según necesites
           ),
           // ENCABEZADO INSTITUCIONAL ---
           pw.Center(
@@ -46,26 +59,43 @@ class PlaneacionServicioPdf {
               children: [
                 //pw.Text("SECRETARÍA DE EDUCACIÓN", style: estiloTitulo),
                 //pw.Text("ESTADO DE ZACATECAS", style: estiloTitulo),
-                pw.Text("UNIDAD DE SERVICIOS DE APOYO A LA EDUCACIÓN REGULAR", 
-                    style: estiloTitulo.copyWith(fontSize: 9)),
+                pw.Text(
+                  "UNIDAD DE SERVICIOS DE APOYO A LA EDUCACIÓN REGULAR",
+                  style: estiloTitulo.copyWith(fontSize: 9),
+                ),
                 pw.SizedBox(height: 2),
-                pw.Text(nombreDocente, style: estiloTitulo.copyWith(fontSize: 10)),
-                pw.Text("ZONA ESCOLAR 18 EDUCACIÓN ESPECIAL", style: estiloTitulo),
-                pw.Text("CICLO ESCOLAR ${planeacion.cicloEscolar}", style: estiloTitulo),
+                pw.Text(
+                  nombreDocente,
+                  style: estiloTitulo.copyWith(fontSize: 10),
+                ),
+                pw.Text(
+                  "ZONA ESCOLAR 18 EDUCACIÓN ESPECIAL",
+                  style: estiloTitulo,
+                ),
+                pw.Text(
+                  "CICLO ESCOLAR ${planeacion.cicloEscolar}",
+                  style: estiloTitulo,
+                ),
                 pw.SizedBox(height: 5),
-                pw.Text("PLANEACIÓN DIDÁCTICA", 
-                    style: estiloTitulo.copyWith(decoration: pw.TextDecoration.underline)),
+                pw.Text(
+                  "PLANEACIÓN DIDÁCTICA",
+                  style: estiloTitulo.copyWith(
+                    decoration: pw.TextDecoration.underline,
+                  ),
+                ),
               ],
             ),
           ),
-          
 
           pw.SizedBox(height: 10),
 
-          // ECHA DE ENTREGA 
+          // ECHA DE ENTREGA
           pw.Align(
             alignment: pw.Alignment.centerRight,
-            child: pw.Text("Fecha de entrega: ${planeacion.fechaEntrega}", style: estiloCelda.copyWith(fontWeight: pw.FontWeight.bold)),
+            child: pw.Text(
+              "Fecha de entrega: ${planeacion.fechaEntrega}",
+              style: estiloCelda.copyWith(fontWeight: pw.FontWeight.bold),
+            ),
           ),
 
           pw.SizedBox(height: 5),
@@ -74,11 +104,11 @@ class PlaneacionServicioPdf {
           pw.Table(
             border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
-              0: const pw.FlexColumnWidth(2.5), 
-              1: const pw.FlexColumnWidth(3.5), 
-              2: const pw.FlexColumnWidth(1.2), 
-              3: const pw.FlexColumnWidth(1.0), 
-              4: const pw.FlexColumnWidth(4.5), 
+              0: const pw.FlexColumnWidth(2.5),
+              1: const pw.FlexColumnWidth(3.5),
+              2: const pw.FlexColumnWidth(1.2),
+              3: const pw.FlexColumnWidth(1.0),
+              4: const pw.FlexColumnWidth(4.5),
             },
             children: [
               pw.TableRow(
@@ -99,11 +129,31 @@ class PlaneacionServicioPdf {
                     child: pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                       children: [
-                        _cuadritoConSigla("INI", planeacion.nivelEducativo.contains("INI"), estiloSigla),
-                        _cuadritoConSigla("PREE", planeacion.nivelEducativo.contains("PREE"), estiloSigla),
-                        _cuadritoConSigla("PRIM", planeacion.nivelEducativo.contains("PRIM"), estiloSigla),
-                        _cuadritoConSigla("SEC", planeacion.nivelEducativo.contains("SEC"), estiloSigla),
-                        _cuadritoConSigla("BACH", planeacion.nivelEducativo.contains("BACH"), estiloSigla),
+                        _cuadritoConSigla(
+                          "INI",
+                          planeacion.nivelEducativo.contains("INI"),
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "PREE",
+                          planeacion.nivelEducativo.contains("PREE"),
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "PRIM",
+                          planeacion.nivelEducativo.contains("PRIM"),
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "SEC",
+                          planeacion.nivelEducativo.contains("SEC"),
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "BACH",
+                          planeacion.nivelEducativo.contains("BACH"),
+                          estiloSigla,
+                        ),
                       ],
                     ),
                   ),
@@ -114,11 +164,31 @@ class PlaneacionServicioPdf {
                     child: pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                       children: [
-                        _cuadritoConSigla("AS", planeacion.condicionAlumnado == "AS", estiloSigla),
-                        _cuadritoConSigla("D", planeacion.condicionAlumnado == "D", estiloSigla),
-                        _cuadritoConSigla("TEA", planeacion.condicionAlumnado == "TEA", estiloSigla),
-                        _cuadritoConSigla("TDAH", planeacion.condicionAlumnado == "TDAH", estiloSigla),
-                        _cuadritoConSigla("TE", planeacion.condicionAlumnado == "TE", estiloSigla),
+                        _cuadritoConSigla(
+                          "AS",
+                          planeacion.condicionAlumnado == "AS",
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "D",
+                          planeacion.condicionAlumnado == "D",
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "TEA",
+                          planeacion.condicionAlumnado == "TEA",
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "TDAH",
+                          planeacion.condicionAlumnado == "TDAH",
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "TE",
+                          planeacion.condicionAlumnado == "TE",
+                          estiloSigla,
+                        ),
                       ],
                     ),
                   ),
@@ -129,7 +199,7 @@ class PlaneacionServicioPdf {
 
           // (Temporalidad, NIP/BAP, Disciplina)
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, ), 
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(1), // 25% (1 de 4 partes)
               1: const pw.FlexColumnWidth(3), // 75% (3 de 4 partes)
@@ -146,8 +216,8 @@ class PlaneacionServicioPdf {
               pw.TableRow(
                 children: [
                   _celdaEtiquetaLateral(
-                    "Necesidades, Intereses, Problematicas (NIP) y Barreras para el Aprendizaje y la Participación (BAP) identificadas en el Programa analítico.", 
-                    estiloCelda.copyWith(fontSize: 6.5)
+                    "Necesidades, Intereses, Problematicas (NIP) y Barreras para el Aprendizaje y la Participación (BAP) identificadas en el Programa analítico.",
+                    estiloCelda.copyWith(fontSize: 6.5),
                   ),
                   _celdaDatoLateral(planeacion.necesidadesBap, estiloCelda),
                 ],
@@ -155,7 +225,10 @@ class PlaneacionServicioPdf {
               // Fila Disciplina
               pw.TableRow(
                 children: [
-                  _celdaEtiquetaLateral("Disciplina (sólo SEC/BACH)", estiloCelda),
+                  _celdaEtiquetaLateral(
+                    "Disciplina (sólo SEC/BACH)",
+                    estiloCelda,
+                  ),
                   _celdaDatoLateral(planeacion.disciplina, estiloCelda),
                 ],
               ),
@@ -163,18 +236,21 @@ class PlaneacionServicioPdf {
           ),
           // CAMPOS FORMATIVOS
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5,),
+            border: pw.TableBorder.all(width: 0.5),
             children: [
               // Fila 1: Título centrado que abarca todo
               pw.TableRow(
                 children: [
-                  _celdaHeader("Campo (s) formativos que se trabajarán", estiloCelda),
+                  _celdaHeader(
+                    "Campo (s) formativos que se trabajarán",
+                    estiloCelda,
+                  ),
                 ],
               ),
             ],
           ),
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5,),
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(1),
               1: const pw.FlexColumnWidth(1),
@@ -186,9 +262,18 @@ class PlaneacionServicioPdf {
               pw.TableRow(
                 children: [
                   _celdaCampoCheck("Lenguajes", estiloSigla),
-                  _celdaCampoCheck("Saberes y pensamiento científico",  estiloSigla),
-                  _celdaCampoCheck("De lo humano y lo comunitario.",  estiloSigla),
-                  _celdaCampoCheck("Ética, Naturaleza y sociedades",  estiloSigla),
+                  _celdaCampoCheck(
+                    "Saberes y pensamiento científico",
+                    estiloSigla,
+                  ),
+                  _celdaCampoCheck(
+                    "De lo humano y lo comunitario.",
+                    estiloSigla,
+                  ),
+                  _celdaCampoCheck(
+                    "Ética, Naturaleza y sociedades",
+                    estiloSigla,
+                  ),
                 ],
               ),
             ],
@@ -196,18 +281,16 @@ class PlaneacionServicioPdf {
 
           // CONTENIDOS
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5,),
+            border: pw.TableBorder.all(width: 0.5),
             children: [
               // Fila 3: Título centrado que abarca todo
               pw.TableRow(
-                children: [
-                  _celdaHeader("Contenido (s)", estiloCelda),
-                ],
+                children: [_celdaHeader("Contenido (s)", estiloCelda)],
               ),
             ],
           ),
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, ),
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(1),
               1: const pw.FlexColumnWidth(1),
@@ -215,13 +298,25 @@ class PlaneacionServicioPdf {
               3: const pw.FlexColumnWidth(1),
             },
             children: [
-              // Fila 4: 4 cuadros con el contenido de la BD 
+              // Fila 4: 4 cuadros con el contenido de la BD (4 campos)
               pw.TableRow(
                 children: [
-                  _celdaTextoContenido(planeacion.contenidos, estiloCelda),
-                  _celdaTextoContenido(planeacion.contenidos, estiloCelda),
-                  _celdaTextoContenido(planeacion.contenidos, estiloCelda),
-                  _celdaTextoContenido(planeacion.contenidos, estiloCelda),
+                  _celdaTextoContenido(
+                    planeacion.contenidos_lenguaje,
+                    estiloCelda,
+                  ),
+                  _celdaTextoContenido(
+                    planeacion.contenidos_saberes_y_pensamiento_cientifico,
+                    estiloCelda,
+                  ),
+                  _celdaTextoContenido(
+                    planeacion.contenidos_de_lo_humano_y_comunitario,
+                    estiloCelda,
+                  ),
+                  _celdaTextoContenido(
+                    planeacion.contenidos_etica_naturaleza_y_sociedad,
+                    estiloCelda,
+                  ),
                 ],
               ),
             ],
@@ -229,7 +324,7 @@ class PlaneacionServicioPdf {
 
           // PDA Y PROBLEMÁTICA
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, ),
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(2), // 50% del ancho
               1: const pw.FlexColumnWidth(2), // 50% del ancho
@@ -238,7 +333,10 @@ class PlaneacionServicioPdf {
               // Fila de Títulos
               pw.TableRow(
                 children: [
-                  _celdaHeader("Proceso (s) de desarrollo de aprendizaje (PDA)", estiloCelda),
+                  _celdaHeader(
+                    "Proceso (s) de desarrollo de aprendizaje (PDA)",
+                    estiloCelda,
+                  ),
                   _celdaHeader("Problemática", estiloCelda),
                 ],
               ),
@@ -251,53 +349,88 @@ class PlaneacionServicioPdf {
               ),
             ],
           ),
-          // EJES ARTICULADORES (TÍTULO) 
+          // EJES ARTICULADORES (TÍTULO)
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5,),
+            border: pw.TableBorder.all(width: 0.5),
             children: [
               pw.TableRow(
-                children: [
-                  _celdaHeader("Ejes articuladores", estiloCelda),
-                ],
+                children: [_celdaHeader("Ejes articuladores", estiloCelda)],
               ),
             ],
           ),
 
-          // CUADRÍCULA DE EJES 
+          // CUADRÍCULA DE EJES
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, ),
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(0.3), // Cuadro X 1
-              1: const pw.FlexColumnWidth(1),   // Texto Eje 1
+              1: const pw.FlexColumnWidth(1), // Texto Eje 1
               2: const pw.FlexColumnWidth(0.3), // Cuadro X 2
-              3: const pw.FlexColumnWidth(1),   // Texto Eje 2
+              3: const pw.FlexColumnWidth(1), // Texto Eje 2
               4: const pw.FlexColumnWidth(0.3), // Cuadro X 3
-              5: const pw.FlexColumnWidth(1),   // Texto Eje 3
+              5: const pw.FlexColumnWidth(1), // Texto Eje 3
               6: const pw.FlexColumnWidth(0.3), // Cuadro X 4
-              7: const pw.FlexColumnWidth(1),   // Texto Eje 4
+              7: const pw.FlexColumnWidth(1), // Texto Eje 4
             },
             children: [
               // Fila 1
               pw.TableRow(
                 children: [
-                  _cuadroCheckboxDinamico("Inclusión", planeacion.ejesArticuladores, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Inclusión",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Inclusión.", estiloSigla),
-                  _cuadroCheckboxDinamico("Artes y expresión estética", planeacion.ejesArticuladores, estiloSigla),
-                  _cuadroTituloCentrado("Artes y expresión estética.", estiloSigla),
-                  _cuadroCheckboxDinamico("Interculturalidad crítica", planeacion.ejesArticuladores, estiloSigla),
-                  _cuadroTituloCentrado("De interculturalidad crítica.", estiloSigla),
-                  _cuadroCheckboxDinamico("Pensamiento crítico", planeacion.ejesArticuladores, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Artes y expresión estética",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
+                  _cuadroTituloCentrado(
+                    "Artes y expresión estética.",
+                    estiloSigla,
+                  ),
+                  _cuadroCheckboxDinamico(
+                    "Interculturalidad crítica",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
+                  _cuadroTituloCentrado(
+                    "De interculturalidad crítica.",
+                    estiloSigla,
+                  ),
+                  _cuadroCheckboxDinamico(
+                    "Pensamiento crítico",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Pensamiento Crítico.", estiloSigla),
                 ],
               ),
               // Fila 2
               pw.TableRow(
                 children: [
-                  _cuadroCheckboxDinamico("Apropiación de las culturas a través de la lectura y la escritura", planeacion.ejesArticuladores, estiloSigla),
-                  _cuadroTituloCentrado("Apropiación de las culturas a través de la lectura y la escritura.", estiloSigla),
-                  _cuadroCheckboxDinamico("Igualdad de género", planeacion.ejesArticuladores, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Apropiación de las culturas a través de la lectura y la escritura",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
+                  _cuadroTituloCentrado(
+                    "Apropiación de las culturas a través de la lectura y la escritura.",
+                    estiloSigla,
+                  ),
+                  _cuadroCheckboxDinamico(
+                    "Igualdad de género",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Igualdad de género.", estiloSigla),
-                  _cuadroCheckboxDinamico("Vida saludable", planeacion.ejesArticuladores, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Vida saludable",
+                    planeacion.ejesArticuladores,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Vida saludable.", estiloSigla),
                   pw.Container(), // Espacios vacíos para mantener la cuadrícula de 8
                   pw.Container(),
@@ -308,14 +441,14 @@ class PlaneacionServicioPdf {
 
           //ESCENARIOS
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, ), 
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(1), // Cuadro X 1
-              1: const pw.FlexColumnWidth(0.3),   // Texto Eje 1
+              1: const pw.FlexColumnWidth(0.3), // Texto Eje 1
               2: const pw.FlexColumnWidth(1), // Cuadro X 2
-              3: const pw.FlexColumnWidth(0.3),   // Texto Eje 2
+              3: const pw.FlexColumnWidth(0.3), // Texto Eje 2
               4: const pw.FlexColumnWidth(1), // Cuadro X 3
-              5: const pw.FlexColumnWidth(0.3),   // Texto Eje 3
+              5: const pw.FlexColumnWidth(0.3), // Texto Eje 3
               6: const pw.FlexColumnWidth(1), // Cuadro X 4
             },
             children: [
@@ -323,11 +456,23 @@ class PlaneacionServicioPdf {
               pw.TableRow(
                 children: [
                   _celdaEtiquetaLateral("Escenario (s):", estiloCelda),
-                  _cuadroCheckboxDinamico("Aulico", planeacion.escenarios, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Aulico",
+                    planeacion.escenarios,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Aulico", estiloSigla),
-                  _cuadroCheckboxDinamico("Escolar", planeacion.escenarios, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Escolar",
+                    planeacion.escenarios,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Escolar", estiloSigla),
-                  _cuadroCheckboxDinamico("Comunitario", planeacion.escenarios, estiloSigla),
+                  _cuadroCheckboxDinamico(
+                    "Comunitario",
+                    planeacion.escenarios,
+                    estiloSigla,
+                  ),
                   _cuadroTituloCentrado("Comunitario", estiloSigla),
                 ],
               ),
@@ -335,7 +480,7 @@ class PlaneacionServicioPdf {
           ),
           // METODOLOGIA Y PROYECTO
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, ), 
+            border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
               0: const pw.FlexColumnWidth(0.77), // 25% (1 de 4 partes)
               1: const pw.FlexColumnWidth(3), // 75% (3 de 4 partes)
@@ -368,9 +513,11 @@ class PlaneacionServicioPdf {
           // Iteramos por cada actividad guardada en la planeación
           ...planeacion.actividades.map((actividad) {
             return pw.Table(
-              border: pw.TableBorder.all(width: 0.5, ),
+              border: pw.TableBorder.all(width: 0.5),
               columnWidths: {
-                0: const pw.FlexColumnWidth(3), // Más espacio para la descripción
+                0: const pw.FlexColumnWidth(
+                  3,
+                ), // Más espacio para la descripción
                 1: const pw.FlexColumnWidth(1), // Menos espacio para materiales
               },
               children: [
@@ -386,9 +533,9 @@ class PlaneacionServicioPdf {
                   children: [
                     // Cuadro de Actividad (Título en negritas + Descripción)
                     _celdaContenidoActividad(
-                      actividad.titulo, 
-                      actividad.descripcion, 
-                      estiloCelda
+                      actividad.titulo,
+                      actividad.descripcion,
+                      estiloCelda,
                     ),
                     // Cuadro de Materiales
                     _celdaTextoContenido(actividad.materiales, estiloCelda),
@@ -398,7 +545,7 @@ class PlaneacionServicioPdf {
             );
           }).toList(),
 
-          // ORGANIZACIÓN, ESPACIO, TIEMPO Y RESPONSABLE 
+          // ORGANIZACIÓN, ESPACIO, TIEMPO Y RESPONSABLE
           pw.Table(
             border: pw.TableBorder.all(width: 0.5),
             columnWidths: {
@@ -420,7 +567,10 @@ class PlaneacionServicioPdf {
               // Segunda fila: Datos de la BD
               pw.TableRow(
                 children: [
-                  _celdaTextoContenido(planeacion.organizacionGrupo, estiloCelda),
+                  _celdaTextoContenido(
+                    planeacion.organizacionGrupo,
+                    estiloCelda,
+                  ),
                   _celdaTextoContenido(planeacion.espacio, estiloCelda),
                   _celdaTextoContenido(planeacion.tiempo, estiloCelda),
                   _celdaTextoContenido(planeacion.responsables, estiloCelda),
@@ -431,14 +581,10 @@ class PlaneacionServicioPdf {
           // EVALUACIÓN FORMATIVA
           pw.Table(
             border: pw.TableBorder.all(width: 0.5),
-            columnWidths: {
-              0: const pw.FlexColumnWidth(1), 
-            },
-            children: [ 
+            columnWidths: {0: const pw.FlexColumnWidth(1)},
+            children: [
               pw.TableRow(
-                children: [
-                  _celdaHeader("Evaluación formativa", estiloCelda),
-                ],
+                children: [_celdaHeader("Evaluación formativa", estiloCelda)],
               ),
             ],
           ),
@@ -448,7 +594,7 @@ class PlaneacionServicioPdf {
               0: const pw.FlexColumnWidth(1), // Columna Indicadores
               1: const pw.FlexColumnWidth(1), // Columna Instrumentos
             },
-            children: [ 
+            children: [
               // Subtítulos
               pw.TableRow(
                 children: [
@@ -459,29 +605,31 @@ class PlaneacionServicioPdf {
               // Datos de la BD
               pw.TableRow(
                 children: [
-                  _celdaTextoContenido(planeacion.evaluacionIndicadores, estiloCelda),
-                  _celdaTextoContenido(planeacion.evaluacionInstrumentos, estiloCelda),
+                  _celdaTextoContenido(
+                    planeacion.evaluacionIndicadores,
+                    estiloCelda,
+                  ),
+                  _celdaTextoContenido(
+                    planeacion.evaluacionInstrumentos,
+                    estiloCelda,
+                  ),
                 ],
               ),
             ],
           ),
 
-          pw.SizedBox(height: 5), // Espacio 
+          pw.SizedBox(height: 5), // Espacio
           // Observaciones
           pw.Table(
             border: pw.TableBorder.all(width: 0.5),
-            columnWidths: {
-              0: const pw.FlexColumnWidth(1), 
-            },
-            children: [ 
+            columnWidths: {0: const pw.FlexColumnWidth(1)},
+            children: [
               pw.TableRow(
-                children: [
-                  _celdaHeader("Observaciones", estiloCelda),
-                ],
+                children: [_celdaHeader("Observaciones", estiloCelda)],
               ),
               pw.TableRow(
                 children: [
-                  _celdaTextoContenido(planeacion.observaciones, estiloCelda)
+                  _celdaTextoContenido(planeacion.observaciones, estiloCelda),
                 ],
               ),
             ],
@@ -492,15 +640,17 @@ class PlaneacionServicioPdf {
     return pdf.save();
   }
 
-  
-
   // --- HELPERS ---
 
   static pw.Widget _celdaHeader(String texto, pw.TextStyle estilo) {
     return pw.Container(
       color: PdfColors.grey200,
       padding: const pw.EdgeInsets.all(2),
-      child: pw.Text(texto, style: estilo.copyWith(fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
+      child: pw.Text(
+        texto,
+        style: estilo.copyWith(fontWeight: pw.FontWeight.bold),
+        textAlign: pw.TextAlign.center,
+      ),
     );
   }
 
@@ -511,7 +661,11 @@ class PlaneacionServicioPdf {
     );
   }
 
-  static pw.Widget _cuadritoConSigla(String sigla, bool marcado, pw.TextStyle estilo) {
+  static pw.Widget _cuadritoConSigla(
+    String sigla,
+    bool marcado,
+    pw.TextStyle estilo,
+  ) {
     return pw.Column(
       mainAxisSize: pw.MainAxisSize.min,
       children: [
@@ -520,8 +674,10 @@ class PlaneacionServicioPdf {
           width: 9,
           height: 9,
           decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
-          child: marcado 
-              ? pw.Center(child: pw.Text("X", style: estilo.copyWith(fontSize: 7))) 
+          child: marcado
+              ? pw.Center(
+                  child: pw.Text("X", style: estilo.copyWith(fontSize: 7)),
+                )
               : null,
         ),
       ],
@@ -534,7 +690,11 @@ class PlaneacionServicioPdf {
       color: PdfColors.grey200,
       padding: const pw.EdgeInsets.all(5),
       alignment: pw.Alignment.center,
-      child: pw.Text(texto, style: estilo.copyWith(fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
+      child: pw.Text(
+        texto,
+        style: estilo.copyWith(fontWeight: pw.FontWeight.bold),
+        textAlign: pw.TextAlign.center,
+      ),
     );
   }
 
@@ -583,16 +743,27 @@ class PlaneacionServicioPdf {
       child: pw.Container(
         width: 10,
         height: 10,
-        decoration: pw.BoxDecoration(
-          border: pw.Border.all(width: 0.5),
-        ),
+        decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
       ),
     );
   }
+
   // Genera el cuadrito y pone una "X" si el texto de la BD coincide con el nombre del eje
-  static pw.Widget _cuadroCheckboxDinamico(String nombreEje, String valorBD, pw.TextStyle estilo) {
-    // Comparamos el string de la BD con el nombre del eje (limpiando espacios por si acaso)
-    bool marcado = valorBD.trim() == nombreEje.trim();
+  static pw.Widget _cuadroCheckboxDinamico(
+    String nombreEje,
+    String valorBD,
+    pw.TextStyle estilo,
+  ) {
+    // Interpretar lista separada por comas en valorBD para marcar los que correspondan
+    bool marcado = false;
+    if (valorBD != null && valorBD.trim().isNotEmpty) {
+      final partes = valorBD
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      marcado = partes.contains(nombreEje.trim());
+    }
 
     return pw.Container(
       alignment: pw.Alignment.center,
@@ -600,11 +771,11 @@ class PlaneacionServicioPdf {
       child: pw.Container(
         width: 10,
         height: 10,
-        decoration: pw.BoxDecoration(
-          border: pw.Border.all(width: 0.5),
-        ),
-        child: marcado 
-            ? pw.Center(child: pw.Text("X", style: estilo.copyWith(fontSize: 7))) 
+        decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
+        child: marcado
+            ? pw.Center(
+                child: pw.Text("X", style: estilo.copyWith(fontSize: 7)),
+              )
             : null,
       ),
     );
@@ -620,7 +791,11 @@ class PlaneacionServicioPdf {
   }
 
   // Helper específico para mostrar Título (Negrita) + Descripción
-  static pw.Widget _celdaContenidoActividad(String titulo, String descripcion, pw.TextStyle estiloBase) {
+  static pw.Widget _celdaContenidoActividad(
+    String titulo,
+    String descripcion,
+    pw.TextStyle estiloBase,
+  ) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(5),
       constraints: const pw.BoxConstraints(minHeight: 60),
@@ -630,12 +805,18 @@ class PlaneacionServicioPdf {
         children: [
           pw.Text(
             titulo,
-            style: estiloBase.copyWith(fontWeight: pw.FontWeight.bold, fontSize: 9),
+            style: estiloBase.copyWith(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 9,
+            ),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
             descripcion,
-            style: estiloBase.copyWith(fontWeight: pw.FontWeight.normal, fontSize: 8),
+            style: estiloBase.copyWith(
+              fontWeight: pw.FontWeight.normal,
+              fontSize: 8,
+            ),
           ),
         ],
       ),
