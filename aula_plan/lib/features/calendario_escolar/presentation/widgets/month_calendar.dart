@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aula_plan/features/calendario_escolar/domain/entidades/evento_entidad.dart';
+
 class MonthCalendar extends StatelessWidget {
   final DateTime month;
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateSelected;
   final List<EventoEntidad> allEvents;
+  final List<Map<String, dynamic>> officialEvents;
 
   const MonthCalendar({
     super.key,
@@ -13,6 +15,7 @@ class MonthCalendar extends StatelessWidget {
     required this.selectedDate,
     required this.onDateSelected,
     required this.allEvents,
+    required this.officialEvents,
   });
 
   @override
@@ -25,17 +28,18 @@ class MonthCalendar extends StatelessWidget {
     final List<DateTime?> cells = List.generate(leadingBlanks, (_) => null)
       ..addAll(List.generate(daysInMonth, (i) => DateTime(year, m, i + 1)));
 
-    while (cells.length % 7 != 0) { cells.add(null); }
+    while (cells.length % 7 != 0) {
+      cells.add(null);
+    }
 
     return Column(
-      mainAxisSize: MainAxisSize.min, // Ocupa el mínimo espacio necesario
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           DateFormat('MMMM yyyy', 'es_ES').format(month).toUpperCase(),
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 10),
-        // GridView ahora con shrinkWrap para evitar errores de layout
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -50,15 +54,40 @@ class MonthCalendar extends StatelessWidget {
             if (date == null) return const SizedBox.shrink();
 
             final isSelected = _isSameDay(date, selectedDate);
-            final hasEvent = allEvents.any((e) => _dateInRange(date, e));
+
+            // Eventos personales 
+            final hasUserEvent = allEvents.any((e) => _dateInRange(date, e));
+
+            // Eventos oficiales (Fondo de celda)
+            final oficialesDelDia = officialEvents.where((e) {
+              final inicio = e['inicio'] as DateTime;
+              final fin = e['fin'] as DateTime;
+              final dia = DateTime(date.year, date.month, date.day);
+              return (dia.isAtSameMomentAs(inicio) || dia.isAfter(inicio)) && (dia.isBefore(fin));
+            }).toList();
+
+            Color backgroundColor = Colors.white;
+            Color textColor = Colors.black;
+            
+            if (oficialesDelDia.isNotEmpty) {
+              backgroundColor = (oficialesDelDia.first['color'] as Color).withOpacity(0.2);
+
+            }
 
             return GestureDetector(
               onTap: () => onDateSelected(date),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.white,
+                  color: isSelected ? Colors.blue.withOpacity(0.3) : backgroundColor,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: isSelected ? Colors.blue : Colors.grey.shade300),
+                  border: Border.all(
+                    color: isSelected 
+                        ? Colors.blue 
+                        : (oficialesDelDia.isNotEmpty 
+                            ? oficialesDelDia.first['color'] as Color 
+                            : Colors.grey.shade300),
+                    width: (isSelected || oficialesDelDia.isNotEmpty) ? 2 : 1,
+                  ),
                 ),
                 child: Stack(
                   alignment: Alignment.center,
@@ -66,17 +95,23 @@ class MonthCalendar extends StatelessWidget {
                     Text(
                       '${date.day}',
                       style: TextStyle(
-                        color: isSelected ? Colors.blue : Colors.black,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? Colors.blue.shade900 : textColor,
+                        fontWeight: (isSelected || oficialesDelDia.isNotEmpty) 
+                            ? FontWeight.bold 
+                            : FontWeight.normal,
                       ),
                     ),
-                    if (hasEvent)
+                    // Solo mostramos el punto si hay eventos del USUARIO
+                    if (hasUserEvent)
                       Positioned(
-                        bottom: 4,
+                        bottom: 6,
                         child: Container(
-                          width: 5,
-                          height: 5,
-                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF8B1D1D), 
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                   ],
@@ -89,16 +124,16 @@ class MonthCalendar extends StatelessWidget {
     );
   }
 
-  bool _isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
-  
   bool _dateInRange(DateTime date, EventoEntidad e) {
     try {
       final DateTime inicio = DateTime.parse(e.fecha_inicio);
       final DateTime fin = DateTime.parse(e.fecha_fin);
       final DateTime dia = DateTime(date.year, date.month, date.day);
-      return (dia.isAtSameMomentAs(inicio) || dia.isAfter(inicio)) &&
-          (dia.isAtSameMomentAs(fin) || dia.isBefore(fin));
+      final DateTime finInclusivo = DateTime(fin.year, fin.month, fin.day, 23, 59);
+      return (dia.isAtSameMomentAs(inicio) || dia.isAfter(inicio)) && (dia.isBefore(finInclusivo));
     } catch (_) {
       return false;
     }

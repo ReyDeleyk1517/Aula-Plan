@@ -20,7 +20,7 @@ class BitacoraServicioPdf {
     // Estilos
     final estiloTituloBold = pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
     final estiloSubtitulo = pw.TextStyle(fontSize: 9, color: PdfColors.black);
-    final estiloHeaderTabla = pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold);
+    final estiloHeaderTabla = pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white);
     final estiloCelda = pw.TextStyle(fontSize: 8);
 
     // Ordenar registros por fecha y hora
@@ -32,10 +32,10 @@ class BitacoraServicioPdf {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.letter,
+        pageFormat: PdfPageFormat.letter.landscape, // Cambiado a landscape para que quepan mejor las 7 columnas
         margin: const pw.EdgeInsets.all(25),
         build: (context) => [
-          //  ENCABEZADO 
+          // ENCABEZADO 
           pw.Header(
             level: 0,
             child: pw.Column(
@@ -65,30 +65,34 @@ class BitacoraServicioPdf {
                 ] else ...[
                   pw.Center(child: pw.Text("DATOS DEL DOCENTE NO CONFIGURADOS", style: estiloSubtitulo.copyWith(color: PdfColors.red))),
                 ],
-                pw.Divider(thickness: 1, color: PdfColors.grey300),
                 pw.SizedBox(height: 10),
               ],
             ),
           ),
 
-          // --- TABLA DE DATOS ---
+          // --- TABLA DE DATOS CON LÍNEAS ---
           pw.Table(
-            border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
-            columnWidths: {
-              0: const pw.FlexColumnWidth(0.8), // Fecha
-              1: const pw.FlexColumnWidth(0.6), // Hora
-              2: const pw.FlexColumnWidth(1.0), // Categoría
-              3: const pw.FlexColumnWidth(1.0), // Título
-              4: const pw.FlexColumnWidth(2.5), // Actividad
-              5: const pw.FlexColumnWidth(2.0), // Observaciones
+            border: pw.TableBorder.all(
+              color: PdfColors.black, 
+              width: 0.5,
+            ),
+            columnWidths: const {
+              0: pw.FlexColumnWidth(0.8), // Fecha
+              1: pw.FlexColumnWidth(0.6), // Hora
+              2: pw.FlexColumnWidth(1.0), // Grado y Grupo
+              3: pw.FlexColumnWidth(1.0), // Categoría
+              4: pw.FlexColumnWidth(1.2), // Título
+              5: pw.FlexColumnWidth(2.5), // Actividad
+              6: pw.FlexColumnWidth(2.0), // Observaciones
             },
             children: [
-              // Fila de Encabezados
+              // Fila de Encabezados con fondo oscuro
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                decoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
                 children: [
                   _celdaHeader("FECHA", estiloHeaderTabla),
                   _celdaHeader("HORA", estiloHeaderTabla),
+                  _celdaHeader("GRADO Y GRUPO", estiloHeaderTabla),
                   _celdaHeader("CATEGORÍA", estiloHeaderTabla),
                   _celdaHeader("TÍTULO", estiloHeaderTabla),
                   _celdaHeader("ACTIVIDAD", estiloHeaderTabla),
@@ -97,27 +101,26 @@ class BitacoraServicioPdf {
               ),
               // Filas de Datos
               ...registros.map((r) => pw.TableRow(
-                    verticalAlignment: pw.TableCellVerticalAlignment.top,
-                    children: [
-                      _celdaTexto(r.fecha, estiloCelda),
-                      _celdaTexto(r.hora, estiloCelda),
-                      _celdaTexto(r.categoria, estiloCelda),
-                      _celdaTexto(r.titulo, estiloCelda),
-                      _celdaTexto(r.actividad, estiloCelda),
-                      _celdaTexto(r.observaciones, estiloCelda),
-                    ],
-                  )),
+                children: [
+                  _celdaTexto(r.fecha, estiloCelda),
+                  _celdaTexto(r.hora, estiloCelda),
+                  _celdaTexto(r.grado_y_grupo, estiloCelda),
+                  _celdaTexto(r.categoria, estiloCelda),
+                  _celdaTexto(r.titulo, estiloCelda),
+                  _celdaTexto(r.actividad, estiloCelda, align: pw.TextAlign.justify),
+                  _celdaTexto(r.observaciones, estiloCelda),
+                ],
+              )),
             ],
           ),
 
-          // firmas
-          pw.SizedBox(height: 50),
+          // Firmas
+          pw.SizedBox(height: 60),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
             children: [
-              //_lineaFirma(perfil != null ? "${perfil.nombre} ${perfil.apellidos}" : "Firma del Docente"),
-              _lineaFirma("Firma del Docente"),
-              _lineaFirma("Sello Institucional"),
+              _lineaFirma("Nombre y Firma del Docente"),
+              _lineaFirma("Vo.Bo. de la Dirección"),
             ],
           ),
         ],
@@ -135,20 +138,25 @@ class BitacoraServicioPdf {
     return pdf.save();
   }
 
-  // Widgets auxiliares
+  // WIDGETS AUXILIARES
 
   static pw.Widget _celdaHeader(String texto, pw.TextStyle estilo) {
-    return pw.Padding(
+    return pw.Container(
       padding: const pw.EdgeInsets.all(5),
+      alignment: pw.Alignment.center,
       child: pw.Text(texto, style: estilo, textAlign: pw.TextAlign.center),
     );
   }
 
-  static pw.Widget _celdaTexto(dynamic valor, pw.TextStyle estilo) {
+  static pw.Widget _celdaTexto(dynamic valor, pw.TextStyle estilo, {pw.TextAlign align = pw.TextAlign.left}) {
     final String contenido = (valor == null) ? "" : valor.toString();
-    return pw.Padding(
-      padding: const pw.EdgeInsets.all(4),
-      child: pw.Text(contenido, style: estilo),
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      child: pw.Text(
+        contenido, 
+        style: estilo, 
+        textAlign: align,
+      ),
     );
   }
 

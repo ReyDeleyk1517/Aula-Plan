@@ -86,6 +86,8 @@ class PlaneacionImplementacionRepositorio implements PlaneacionRepositorio {
       responsables: entidad.responsables,
       evaluacionIndicadores: entidad.evaluacionIndicadores,
       evaluacionInstrumentos: entidad.evaluacionInstrumentos,
+      // Mapeo de problemática
+      problematica: entidad.problematica,
       // Mapear actividades en lugar de fases
       actividades: listaActividadesModelos,
     );

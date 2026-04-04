@@ -7,7 +7,12 @@ class OpcionesFiltrado extends StatelessWidget {
   final String selectedValue;
   final Function(String) onSelected;
 
-  const OpcionesFiltrado({required this.label, required this.options, required this.selectedValue, required this.onSelected});
+  const OpcionesFiltrado({
+    required this.label, 
+    required this.options, 
+    required this.selectedValue, 
+    required this.onSelected
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,28 +21,41 @@ class OpcionesFiltrado extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textLight)),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: options.map((opt) {
-              final isSelected = opt == selectedValue;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(opt),
-                  selected: isSelected,
-                  onSelected: (_) => onSelected(opt),
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(fontSize: 11, color: isSelected ? Colors.white : AppColors.textDark),
-                  showCheckmark: false,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-              );
-            }).toList(),
+          child: Text(
+            label.toUpperCase(), 
+            style: const TextStyle(
+              fontSize: 10, 
+              fontWeight: FontWeight.w800, 
+              color: AppColors.textLight
+            )
           ),
         ),
+        Wrap(
+          spacing: 8.0, 
+          runSpacing: 0.0, 
+          children: options.map((opt) {
+            final isSelected = opt == selectedValue;
+            return ChoiceChip(
+              label: Text(opt),
+              selected: isSelected,
+              onSelected: (_) => onSelected(opt),
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
+                fontSize: 11, 
+                color: isSelected ? Colors.white : AppColors.textDark
+              ),
+              showCheckmark: false,
+              backgroundColor: AppColors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: isSelected ? AppColors.primary : AppColors.border,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16), 
       ],
     );
   }

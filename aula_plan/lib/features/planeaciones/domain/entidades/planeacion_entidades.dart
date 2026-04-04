@@ -30,6 +30,8 @@ class PlaneacionEntidad {
   final String evaluacionIndicadores;
   final String evaluacionInstrumentos;
   final String observaciones;
+  // Nueva: problemática de la planeación
+  final String problematica;
 
   // Una planeación tiene múltiples actividades
   final List<ActividadPlaneacionEntidad> actividades;
@@ -65,6 +67,7 @@ class PlaneacionEntidad {
     required this.evaluacionIndicadores,
     required this.evaluacionInstrumentos,
     required this.observaciones,
+    required this.problematica,
     this.actividades = const [],
   });
 }

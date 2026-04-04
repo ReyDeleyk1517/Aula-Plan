@@ -77,7 +77,7 @@ class _EventoCrearEditarViewState extends State<EventoCrearEditarView> {
         String fechaFormateada = _formatDateTime(seleccionado);
         if (esInicio) {
           _fechaInicio = fechaFormateada;
-          // Validación simple: si la fecha fin es menor a la nueva fecha inicio, las igualamos
+          // Validación si la fecha fin es menor a la nueva fecha inicio, igualar
           if (DateTime.parse(_fechaFin).isBefore(seleccionado)) {
             _fechaFin = fechaFormateada;
           }

@@ -22,6 +22,7 @@ class BitacoraImplementacionRepositorio implements BitacoraRepositorio {
       actividad: registro.actividad,
       observaciones: registro.observaciones,
       perfilId: idActivo!,
+      grado_y_grupo: registro.grado_y_grupo,
     );
     await fuenteDatosLocal.insertarRegistro(modelo);
   }
@@ -41,12 +42,11 @@ class BitacoraImplementacionRepositorio implements BitacoraRepositorio {
   Future<void> editarRegistro(BitacoraEntidad registro) async {
     // Convertir la Entidad a Modelo
     final modelo = _mapearEntidadAModelo(registro);
-    
+
     // Llamar al método en el DataSource
     await fuenteDatosLocal.actualizarRegistro(modelo);
   }
 
-  
   BitacoraModelo _mapearEntidadAModelo(BitacoraEntidad registro) {
     return BitacoraModelo(
       id: registro.id,
@@ -57,6 +57,7 @@ class BitacoraImplementacionRepositorio implements BitacoraRepositorio {
       actividad: registro.actividad,
       observaciones: registro.observaciones,
       perfilId: registro.perfilId,
+      grado_y_grupo: registro.grado_y_grupo,
     );
   }
 }

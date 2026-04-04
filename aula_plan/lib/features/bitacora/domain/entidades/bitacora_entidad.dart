@@ -7,6 +7,8 @@ class BitacoraEntidad {
   final String actividad;
   final String observaciones;
   final int? perfilId;
+  // Campo opcional para grado y grupo
+  final String? grado_y_grupo;
 
   BitacoraEntidad({
     this.id,
@@ -17,5 +19,6 @@ class BitacoraEntidad {
     required this.actividad,
     required this.observaciones,
     this.perfilId,
+    this.grado_y_grupo,
   });
 }

@@ -59,6 +59,7 @@ class DbHelper {
             titulo TEXT,
             actividad TEXT,
             observaciones TEXT,
+            grado_y_grupo TEXT,
             perfil_id INTEGER,
             FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
           )
@@ -112,6 +113,7 @@ class DbHelper {
             evaluacion_indicadores TEXT,
             evaluacion_instrumentos TEXT,
             observaciones TEXT,
+            problematica TEXT,
             FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
           )
         ''');

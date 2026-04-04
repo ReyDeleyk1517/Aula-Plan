@@ -51,7 +51,7 @@ class PlaneacionServicioPdf {
               logoImagen,
               width: 100,
               height: 100,
-            ), // Ajusta el tamaño según necesites
+            ), // Ajusta el tamaño
           ),
           // ENCABEZADO INSTITUCIONAL ---
           pw.Center(
@@ -344,7 +344,7 @@ class PlaneacionServicioPdf {
               pw.TableRow(
                 children: [
                   _celdaTextoContenido(planeacion.pda, estiloCelda),
-                  _celdaTextoContenido("placeholder", estiloCelda),
+                  _celdaTextoContenido(planeacion.problematica, estiloCelda),
                 ],
               ),
             ],
@@ -735,18 +735,6 @@ class PlaneacionServicioPdf {
     );
   }
 
-  // Genera el cuadrito blanco vacío a la izquierda del eje
-  static pw.Widget _cuadroBlancoEje() {
-    return pw.Container(
-      alignment: pw.Alignment.center,
-      padding: const pw.EdgeInsets.only(top: 5, bottom: 5, left: 5),
-      child: pw.Container(
-        width: 10,
-        height: 10,
-        decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
-      ),
-    );
-  }
 
   // Genera el cuadrito y pone una "X" si el texto de la BD coincide con el nombre del eje
   static pw.Widget _cuadroCheckboxDinamico(
@@ -756,7 +744,7 @@ class PlaneacionServicioPdf {
   ) {
     // Interpretar lista separada por comas en valorBD para marcar los que correspondan
     bool marcado = false;
-    if (valorBD != null && valorBD.trim().isNotEmpty) {
+    if (valorBD.trim().isNotEmpty) {
       final partes = valorBD
           .split(',')
           .map((s) => s.trim())

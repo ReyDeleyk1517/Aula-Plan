@@ -31,6 +31,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
     required String responsables,
     required String evaluacionIndicadores,
     required String evaluacionInstrumentos,
+    required String problematica,
     List<ActividadPlaneacionModelo> actividades = const [],
   }) : super(
          id: id,
@@ -65,6 +66,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
          responsables: responsables,
          evaluacionIndicadores: evaluacionIndicadores,
          evaluacionInstrumentos: evaluacionInstrumentos,
+         problematica: problematica,
          actividades: actividades,
        );
 
@@ -105,6 +107,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       responsables: mapa['responsables'],
       evaluacionIndicadores: mapa['evaluacion_indicadores'],
       evaluacionInstrumentos: mapa['evaluacion_instrumentos'],
+      problematica: mapa['problematica'] ?? '',
       actividades: actividades,
     );
   }
@@ -143,6 +146,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       'responsables': responsables,
       'evaluacion_indicadores': evaluacionIndicadores,
       'evaluacion_instrumentos': evaluacionInstrumentos,
+      'problematica': problematica,
     };
   }
 
@@ -180,6 +184,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       responsables: entidad.responsables,
       evaluacionIndicadores: entidad.evaluacionIndicadores,
       evaluacionInstrumentos: entidad.evaluacionInstrumentos,
+      problematica: entidad.problematica,
       // Mapear actividades
       actividades: entidad.actividades
           .map((a) => ActividadPlaneacionModelo.fromEntity(a))

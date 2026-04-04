@@ -2,12 +2,10 @@ import 'package:aula_plan/features/bitacora/presentation/paginas/bitacora_previe
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:aula_plan/core/injection_container.dart';
 
 // Imports de dominio y lógica
 import 'package:aula_plan/features/bitacora/domain/entidades/bitacora_entidad.dart';
 import '../bloc/bitacora_cubit.dart'; 
-import '../bloc/bitacora_crear_editar_cubit.dart';
 
 // Imports de presentación
 import '../widgets/bitacora_card.dart';
@@ -89,9 +87,9 @@ class BitacoraView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-          title: const Text("Bitacora Docente"),
+          title: const Text('Bitacora Docente', style: TextStyle(fontWeight: FontWeight.bold)),
+          elevation: 0,
           centerTitle: true,
-          
       ),
       body: SafeArea(
         child: Column(

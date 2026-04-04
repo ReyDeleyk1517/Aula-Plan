@@ -3,7 +3,7 @@ import '../../domain/entidades/evento_entidad.dart';
 
 class EventoCard extends StatelessWidget {
   final EventoEntidad evento;
-  final VoidCallback? onTap;
+  final VoidCallback? onTap; // Para editar
   final bool estaSeleccionado;
   final VoidCallback onToggleSeleccion;
 
@@ -17,126 +17,94 @@ class EventoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definición de colores e iconos por categoría
     Color colorCat;
     IconData iconoCat;
-
     switch (evento.tipo_evento) {
-      case "Reunion":
-        colorCat = const Color(0xFF10B981);
+      case "Académico":
+        colorCat = const Color(0xFF3B82F6); 
         iconoCat = Icons.school_outlined;
         break;
-      case "Actividad":
-        colorCat = const Color.fromARGB(255, 34, 162, 221);
-        iconoCat = Icons.report_problem_outlined;
+      case "Cívico":
+        colorCat = const Color(0xFF10B981);
+        iconoCat = Icons.flag_outlined;
         break;
-      case "Evaluacion":
-        colorCat = const Color(0xFFF59E0B);
-        iconoCat = Icons.assignment_turned_in_outlined;
+      case "Social":
+        colorCat = const Color(0xFF8B5CF6);
+        iconoCat = Icons.celebration_outlined;
         break;
+      case "Urgente":
+        colorCat = const Color(0xFFEF4444); 
+        iconoCat = Icons.priority_high_rounded;
+        break;
+      case "Otros":
       default:
-        colorCat = const Color(0xFF64748B);
-        iconoCat = Icons.bookmark_outline;
+        colorCat = const Color(0xFF64748B); 
+        iconoCat = Icons.more_horiz_outlined;
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.only(bottom: 12, left: 8, right: 8),
+      elevation: estaSeleccionado ? 4 : 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: estaSeleccionado 
+            ? const BorderSide(color: Color(0xFF6366F1), width: 2) 
+            : BorderSide.none,
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
+            color: colorCat.withOpacity(0.04), // Fondo sutil
             border: Border(left: BorderSide(color: colorCat, width: 6)),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Columna de fechas
-              Column(
-                children: [
-                  const Icon(Icons.access_time, size: 16, color: Color(0xFF64748B)),
-                  const SizedBox(height: 4),
-                  Text(
-                    evento.fecha_inicio,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  Text(
-                    evento.fecha_fin,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              
-              // Contenido Principal
+              // Contenido Principal 
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header: Categoría
                     Row(
                       children: [
                         Icon(iconoCat, size: 14, color: colorCat),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 6),
                         Text(
                           evento.tipo_evento.toUpperCase(),
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 10, 
+                            fontWeight: FontWeight.bold, 
                             color: colorCat,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.8
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    
-                    // Título
                     Text(
                       evento.titulo,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                        color: Color(0xFF1E293B),
+                        fontWeight: FontWeight.bold, 
+                        fontSize: 16, 
+                        color: Color(0xFF1E293B)
                       ),
                     ),
-                    const Divider(height: 20, thickness: 0.5),
-
-                    // Subtítulos con Iconos
-                    _buildInfoRow(
-                      icon: Icons.text_fields,
-                      label: "descripcion:",
-                      value: evento.descripcion,
-                    ),
                     const SizedBox(height: 8),
-                    _buildInfoRow(
-                      icon: Icons.location_city,
-                      label: "Lugar:",
-                      value: evento.lugar,
-                    ),
+                    _buildInfoRow(Icons.location_on_outlined, "Lugar:", evento.lugar),
+                    const SizedBox(height: 4),
+                    _buildInfoRow(Icons.description_outlined, "Nota:", evento.descripcion),
                   ],
                 ),
               ),
-
-              // Botón de Selección
+              // Selector lateral
               IconButton(
-                visualDensity: VisualDensity.compact,
                 icon: Icon(
                   estaSeleccionado ? Icons.check_circle : Icons.radio_button_unchecked,
                   color: estaSeleccionado ? const Color(0xFF6366F1) : Colors.grey.shade400,
-                  size: 28,
+                  size: 26,
                 ),
                 onPressed: onToggleSeleccion,
               ),
@@ -147,27 +115,18 @@ class EventoCard extends StatelessWidget {
     );
   }
 
-  // Widget auxiliar para las filas de información con subtítulo e icono
-  Widget _buildInfoRow({required IconData icon, required String label, required String value}) {
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    if (value.isEmpty) return const SizedBox.shrink(); 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF94A3B8)),
-        const SizedBox(width: 8),
+        Icon(icon, size: 13, color: const Color(0xFF94A3B8)),
+        const SizedBox(width: 6),
         Expanded(
-          child: RichText(
-            maxLines: 2, 
-            overflow: TextOverflow.ellipsis, 
-            text: TextSpan(
-              style: const TextStyle(fontSize: 13, color: Color(0xFF475569)),
-              children: [
-                TextSpan(
-                  text: "$label ",
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
-                ),
-                TextSpan(text: value),
-              ],
-            ),
+          child: Text(
+            "$label $value",
+            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

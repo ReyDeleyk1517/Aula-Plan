@@ -15,11 +15,8 @@ class ActividadesWidget extends StatefulWidget {
 }
 
 class _ActividadesWidgetState extends State<ActividadesWidget> {
-  // Lista de mapas de controladores para que cada campo sea independiente
   late List<Map<String, TextEditingController>> _controllers;
   final Color zacTinto = const Color(0xFF8B1D1D);
-
-  // DENTRO DE _ActividadesWidgetState en actividades_widget.dart
 
   @override
   void initState() {
@@ -145,7 +142,7 @@ class _ActividadesWidgetState extends State<ActividadesWidget> {
                     ],
                   ),
                 ),
-                // Campos de la Fase (Similares al resto de la planeación)
+                // Campos de la Fase
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -177,7 +174,7 @@ class _ActividadesWidgetState extends State<ActividadesWidget> {
           );
         }).toList(),
 
-        // Botón para añadir más, con el estilo del mockup
+        // Botón para añadir más
         TextButton.icon(
           onPressed: _agregarNuevaActividad,
           icon: const Icon(Icons.add_circle_outline),
@@ -211,7 +208,7 @@ class _ActividadesWidgetState extends State<ActividadesWidget> {
         controller: ctrl,
         maxLines: maxLines,
         onChanged: (_) =>
-            _notificarCambios(), // Sincroniza con el padre en cada tecla
+            _notificarCambios(), 
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon, size: 20, color: zacTinto.withOpacity(0.6)),

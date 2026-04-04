@@ -6,7 +6,6 @@ import 'package:aula_plan/features/recursos_docentes/presentation/widgets/app_co
 import 'package:aula_plan/features/recursos_docentes/presentation/widgets/recurso_card.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/widgets/modal_filtros.dart';
 
-
 class RecursosDocenteView extends StatefulWidget {
   const RecursosDocenteView({super.key});
 
@@ -35,90 +34,105 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgApp,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Planeaciones',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
-            _buildActiveFiltersArea(), 
+            _buildSearchBar(context),
+            _buildActiveFiltersArea(),
             const Expanded(child: _RecursosList()),
           ],
         ),
       ),
-  floatingActionButton: BlocBuilder<RecursosDocenteCubit, RecursosDocenteState>(
-        builder: (context, state) {
-          // Si hay elementos seleccionados, mostramos acciones de exportar y eliminar, siguiendo el patrón de Bitácora
-          if (state.seleccionadosIds.isNotEmpty) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton.extended(
-                  heroTag: 'zip',
-                  onPressed: () => context.read<RecursosDocenteCubit>().exportarAZip(),
-                  label: Text('Exportar ZIP (${state.seleccionadosIds.length})'),
-                  icon: const Icon(Icons.share),
-                  backgroundColor: AppColors.accent,
-                ),
-                const SizedBox(height: 12),
-                FloatingActionButton.extended(
-                  heroTag: 'delete',
-                  onPressed: () => _confirmarEliminacion(context),
-                  label: Text('Eliminar (${state.seleccionadosIds.length})'),
-                  icon: const Icon(Icons.delete),
-                  backgroundColor: Colors.red,
-                ),
-              ],
-            );
-          }
+      floatingActionButton:
+          BlocBuilder<RecursosDocenteCubit, RecursosDocenteState>(
+            builder: (context, state) {
+              if (state.seleccionadosIds.isNotEmpty) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FloatingActionButton.extended(
+                      heroTag: 'zip',
+                      onPressed: () =>
+                          context.read<RecursosDocenteCubit>().exportarAZip(),
+                      label: Text(
+                        'Exportar ZIP (${state.seleccionadosIds.length})',
+                      ),
+                      icon: const Icon(Icons.share),
+                      backgroundColor: AppColors.accent,
+                    ),
+                    const SizedBox(height: 12),
+                    FloatingActionButton.extended(
+                      heroTag: 'delete',
+                      onPressed: () => _confirmarEliminacion(context),
+                      label: Text(
+                        'Eliminar (${state.seleccionadosIds.length})',
+                      ),
+                      icon: const Icon(Icons.delete),
+                      backgroundColor: Colors.red,
+                    ),
+                  ],
+                );
+              }
 
-          // Botón principal para añadir recurso cuando no hay selección
-          return FloatingActionButton(
-            heroTag: 'btn_add',
-            backgroundColor: AppColors.primary,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const RecursoAgregarEditarView()),
-            ),
-            child: Icon(Icons.add, color: Colors.white),
-          );
-        },
-      ),
+              return FloatingActionButton(
+                heroTag: 'btn_add',
+                backgroundColor: AppColors.primary,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RecursoAgregarEditarView(),
+                  ),
+                ),
+                child: const Icon(Icons.add, color: Colors.white),
+              );
+            },
+          ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  // barra de búsqueda
+  Widget _buildSearchBar(BuildContext context) {
     return Container(
-      color: AppColors.white,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 15),
-      child: Column(
+      padding: const EdgeInsets.all(16), 
+      color: Colors.white,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Recursos docentes",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
-              ),
-              IconButton(
-                icon: const Icon(Icons.tune, color: AppColors.primary),
-                onPressed: () => _mostrarModalFiltros(context),
-                tooltip: "Filtrar",
-              )
-            ],
-          ),
-          const SizedBox(height: 15),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            decoration: BoxDecoration(color: AppColors.bgApp, borderRadius: BorderRadius.circular(10)),
+          Expanded(
             child: TextField(
               controller: _searchController,
-              onChanged: (val) => context.read<RecursosDocenteCubit>().actualizarBusqueda(val),
-              decoration: const InputDecoration(
-                icon: Icon(Icons.search, color: AppColors.textLight, size: 20),
-                hintText: "Buscar material o autor...",
-                border: InputBorder.none,
-                hintStyle: TextStyle(fontSize: 14, color: AppColors.textLight),
+              onChanged: (val) =>
+                  context.read<RecursosDocenteCubit>().actualizarBusqueda(val),
+              decoration: InputDecoration(
+                hintText: 'Buscar material o autor...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: const Color(0xFFF1F5F9), // El gris de planeaciones
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: EdgeInsets.zero,
               ),
             ),
+          ),
+          const SizedBox(width: 12),
+          IconButton.filledTonal(
+            onPressed: () => _mostrarModalFiltros(context),
+            icon: const Icon(Icons.tune, color: AppColors.primary),
           ),
         ],
       ),
@@ -132,31 +146,28 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
         final List<Widget> chips = [];
 
         if (state.filtroArea != 'Todas') {
-          chips.add(InputChip(
-            label: Text(state.filtroArea, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
-            onDeleted: () => cubit.cambiarFiltroArea('Todas'),
-            deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
-          ));
+          chips.add(
+            _buildFilterChip(
+              state.filtroArea,
+              () => cubit.cambiarFiltroArea('Todas'),
+            ),
+          );
         }
         if (state.filtroCampo != 'Todos') {
-          chips.add(InputChip(
-            label: Text(state.filtroCampo, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
-            onDeleted: () => cubit.cambiarFiltroCampo('Todos'),
-            deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
-          ));
+          chips.add(
+            _buildFilterChip(
+              state.filtroCampo,
+              () => cubit.cambiarFiltroCampo('Todos'),
+            ),
+          );
         }
         if (state.filtroTipo != 'Todos') {
-          chips.add(InputChip(
-            label: Text(state.filtroTipo, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
-            onDeleted: () => cubit.cambiarFiltroTipo('Todos'),
-            deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
-          ));
+          chips.add(
+            _buildFilterChip(
+              state.filtroTipo,
+              () => cubit.cambiarFiltroTipo('Todos'),
+            ),
+          );
         }
 
         if (chips.isEmpty) return const SizedBox.shrink();
@@ -167,10 +178,37 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: chips,
+            children: chips
+                .map(
+                  (c) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: c,
+                  ),
+                )
+                .toList(),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFilterChip(String label, VoidCallback onDeleted) {
+    return InputChip(
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
+      ),
+      onDeleted: onDeleted,
+      deleteIcon: const Icon(Icons.close, size: 14, color: AppColors.primary),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppColors.primary),
+      ),
     );
   }
 
@@ -184,14 +222,22 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
   }
 
   void _confirmarEliminacion(BuildContext context) {
-    final seleccionados = context.read<RecursosDocenteCubit>().state.seleccionadosIds;
+    final seleccionados = context
+        .read<RecursosDocenteCubit>()
+        .state
+        .seleccionadosIds;
     showDialog(
       context: context,
       builder: (innerContext) => AlertDialog(
         title: const Text('Eliminar recursos'),
-        content: Text('¿Eliminar ${seleccionados.length} recursos seleccionados?'),
+        content: Text(
+          '¿Eliminar ${seleccionados.length} recursos seleccionados?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(innerContext), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(innerContext),
+            child: const Text('Cancelar'),
+          ),
           ElevatedButton(
             onPressed: () {
               final cubit = context.read<RecursosDocenteCubit>();
@@ -200,15 +246,17 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
               }
               Navigator.pop(innerContext);
             },
-            child: const Text('Eliminar'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
 }
-
 
 class _RecursosList extends StatelessWidget {
   const _RecursosList();
@@ -217,9 +265,18 @@ class _RecursosList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<RecursosDocenteCubit, RecursosDocenteState>(
       builder: (context, state) {
-        if (state.cargando) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        if (state.cargando)
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
         final items = state.recursosFiltrados;
-        if (items.isEmpty) return const Center(child: Text("Sin resultados", style: TextStyle(color: AppColors.textLight)));
+        if (items.isEmpty)
+          return const Center(
+            child: Text(
+              "Sin resultados",
+              style: TextStyle(color: AppColors.textLight),
+            ),
+          );
         return ListView.builder(
           padding: const EdgeInsets.only(top: 15, bottom: 80),
           itemCount: items.length,
