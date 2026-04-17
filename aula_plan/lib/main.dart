@@ -2,6 +2,7 @@ import 'package:aula_plan/features/planeaciones/presentation/paginas/planeacion_
 import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/paginas/recurso_docente_view.dart';
 import 'package:aula_plan/planeacion_screen.dart';
+import 'package:aula_plan/test_share_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -201,26 +202,14 @@ class MenuPrincipal extends StatelessWidget {
               color: Colors.orange,
               destino: const PerfilView(),
             ),
-            Card(
-              child: InkWell(
-                onTap: () => _modalRutaBD(context, rutadb),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.abc),
-                    const SizedBox(height: 10),
-                    Text(
-                      "ruta",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+            _crearBotonModulo(
+              context,
+              titulo: 'test',
+              icono: Icons.terrain_sharp,
+              color: Colors.orange,
+              destino: const TestShareScreen(),
             ),
+            
           ],
         ),
       ),

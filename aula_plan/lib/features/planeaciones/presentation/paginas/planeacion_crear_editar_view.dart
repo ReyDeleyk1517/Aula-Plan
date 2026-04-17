@@ -47,6 +47,9 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
       _instrumentosCtrl,
       _problematicaCtrl;
 
+  late List<String> _fasesSeleccionadas;
+  late List<String> _condicionesSeleccionadas;
+
   late String _nivelEducativo, _condicionAlumnado, _ejesArticuladores;
   late bool _escAulicoSelected, _escEscolarSelected, _escComunitarioSelected;
   late List<Map<String, String>> _actividades;
@@ -56,7 +59,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     super.initState();
     final p = widget.planeacionExistente;
 
-    // Inicialización simplificada
+    // Inicialización
     _nombreProyectoCtrl = TextEditingController(text: p?.nombreProyecto ?? '');
     _nombreEscuelaCtrl = TextEditingController(text: p?.nombreEscuela ?? '');
     _cicloEscolarCtrl = TextEditingController(text: p?.cicloEscolar ?? '');
@@ -98,8 +101,24 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
     _nivelEducativo = p?.nivelEducativo ?? "INI";
     _condicionAlumnado = p?.condicionAlumnado ?? "AS";
+
+    // En initState...
+    final fasesString = p?.faseEducativa ?? '';
+    _fasesSeleccionadas = fasesString
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    final condicionesString = p?.condicionAlumnado ?? '';
+    _condicionesSeleccionadas = condicionesString
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
     _ejesArticuladores = p?.ejesArticuladores ?? "Inclusión";
 
+    //escenarios
     final tokens = (p?.escenarios ?? '').split(',').map((s) => s.trim());
     _escAulicoSelected = tokens.contains('Aulico');
     _escEscolarSelected = tokens.contains('Escolar');
@@ -117,72 +136,89 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
   }
 
   // Convierte texto en una lista de viñetas, separadas por una línea en blanco entre ítems
-  String _bulletize(String text) {
-    final lines = text
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
-    if (lines.isEmpty) return '';
-    final bullets = lines.map((l) => '- $l').toList();
-    return bullets.join('\n\n');
-  }
-
-  // Inserta el bloque de viñetas en el control correspondiente, asegurando separación
+  // Esta función ahora es más robusta y evita duplicados de viñetas
   void _smartAppend(TextEditingController ctrl, String nuevoTexto) {
     if (nuevoTexto.trim().isEmpty) return;
-    final currentRaw = ctrl.text;
+
+    // Convertimos el nuevo texto en viñetas limpias
     final formatted = _bulletize(nuevoTexto);
     if (formatted.isEmpty) return;
-    final prefix = currentRaw.trim().isEmpty ? '' : '\n\n';
+
+    final currentRaw = ctrl.text.trim();
+    // Si ya hay texto, agregamos dos saltos de línea para separar bloques
+    final prefix = currentRaw.isEmpty ? '' : '\n\n';
+
     setState(() {
       ctrl.text = '$currentRaw$prefix$formatted';
     });
   }
 
-  Future<void> _ejecutarBuscador() async {
-    final result = await showGeneralDialog(
+  String _bulletize(String text) {
+    return text
+        .split('\n')
+        .map((linea) => linea.trim())
+        .where((linea) => linea.isNotEmpty)
+        // Evitamos agregar un guion si la línea ya empieza con uno
+        .map((linea) => linea.startsWith('-') ? linea : '- $linea')
+        .join('\n\n');
+  }
+
+  void _ejecutarBuscador() async {
+    // Ahora recibimos el mapa agrupado por campos
+    final resultado = await showDialog<Map<String, Map<String, List<String>>>>(
       context: context,
-      pageBuilder: (context, anim1, anim2) => const BuscadorContenidosDialog(),
+      builder: (context) => BuscadorContenidosDialog(
+        fasesHabilitadas: _fasesSeleccionadas, // Pasamos la lista de fases
+      ),
     );
 
-    if (result != null && result is Map) {
-      final String campo = result['campo'];
-      final Map<String, List<String>> datos = result['datos'];
+    if (resultado != null && resultado.isNotEmpty) {
+      // Recorremos cada campo que tenga selecciones (LEN, SyPC, etc.)
+      resultado.forEach((campo, contenidosMap) {
+        // 1. Preparamos el texto de Contenidos para este campo
+        final String contenidosTexto = contenidosMap.keys.join('\n');
 
-      // Determinar qué controlador de contenido usar
-      TextEditingController? ctrlContenido;
-      switch (campo) {
-        case 'LEN':
-          ctrlContenido = _contenidosLenguajeCtrl;
-          break;
-        case 'SyPC':
-          ctrlContenido = _contenidosSaberesCtrl;
-          break;
-        case 'ENyS':
-          ctrlContenido = _contenidosEticaCtrl;
-          break;
-        case 'DHyC':
-          ctrlContenido = _contenidosHumanosCtrl;
-          break;
-      }
+        // 2. Preparamos los PDAs para este campo
+        final String pdasTexto = contenidosMap.values
+            .expand((lista) => lista)
+            .join('\n');
 
-      // Iterar sobre cada contenido seleccionado
-      datos.forEach((contenido, listaPdas) {
-        // 1. Agregamos el título del contenido al controlador del campo formativo
-        if (ctrlContenido != null) {
-          _smartAppend(ctrlContenido, _bulletize(contenido));
+        // 3. Identificamos el controlador correcto y usamos _smartAppend
+        switch (campo) {
+          case 'LEN':
+            _smartAppend(_contenidosLenguajeCtrl, contenidosTexto);
+            break;
+          case 'SyPC':
+            _smartAppend(_contenidosSaberesCtrl, contenidosTexto);
+            break;
+          case 'ENyS':
+            _smartAppend(_contenidosEticaCtrl, contenidosTexto);
+            break;
+          case 'DHyC':
+            _smartAppend(_contenidosHumanosCtrl, contenidosTexto);
+            break;
         }
 
-        // 2. Agregamos sus PDAs al controlador de PDAs
-        // Formateamos cada PDA como viñeta y separamos con una línea en blanco
-        final String pdasFormateados = listaPdas
-            .map((pd) => '- $pd')
-            .toList()
-            .join('\n\n');
-        _smartAppend(_pdaCtrl, pdasFormateados);
+        // 4. Agregamos los PDAs al controlador general con un separador de campo
+        if (pdasTexto.isNotEmpty) {
+          _smartAppend(
+            _pdaCtrl,
+            "PDA de ${_nombresCompletos(campo)}:\n$pdasTexto",
+          );
+        }
       });
     }
+  }
+
+  // Función auxiliar para que el separador de PDA se vea bien
+  String _nombresCompletos(String campo) {
+    const nombres = {
+      'LEN': 'Lenguajes',
+      'SyPC': 'Saberes y P.C.',
+      'ENyS': 'Ética, Nat. y Soc.',
+      'DHyC': 'De lo Humano y Com.',
+    };
+    return nombres[campo] ?? campo;
   }
 
   @override
@@ -265,25 +301,35 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                                 onChanged: (val) =>
                                     setState(() => _nivelEducativo = val!),
                               ),
-                              _buildCustomDropdown(
-                                value: _condicionAlumnado,
-                                label: "Condición Alumnado",
-                                icon: Icons.psychology_alt,
-                                options: ["AS", "D", "TEA", "TDAH", "TE"],
-                                onChanged: (val) =>
-                                    setState(() => _condicionAlumnado = val!),
-                              ),
                               _customField(
                                 _cicloEscolarCtrl,
                                 "Ciclo Escolar",
                                 Icons.calendar_month,
                                 "2024-2025",
                               ),
-                              _customField(
-                                _faseEducativaCtrl,
-                                "Fase Educativa",
-                                Icons.category,
-                                "Fase...",
+                              _buildMultiSelectSection(
+                                titulo: "Condición del Alumnado",
+                                opciones: ["AS", "D", "TEA", "TDAH", "TE"],
+                                seleccionados: _condicionesSeleccionadas,
+                                onSelected: (opt, val) {
+                                  setState(() {
+                                    val
+                                        ? _condicionesSeleccionadas.add(opt)
+                                        : _condicionesSeleccionadas.remove(opt);
+                                  });
+                                },
+                              ),                          
+                              _buildMultiSelectSection(
+                                titulo: "Fases Educativas",
+                                opciones: ["Fase 2", "Fase 3", "Fase 4", "Fase 5", "Fase 6"],
+                                seleccionados: _fasesSeleccionadas,
+                                onSelected: (opt, val) {
+                                  setState(() {
+                                    val
+                                        ? _fasesSeleccionadas.add(opt)
+                                        : _fasesSeleccionadas.remove(opt);
+                                  });
+                                },
                               ),
                               _customField(
                                 _grupoCtrl,
@@ -353,31 +399,40 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
                               // BOTÓN DE BÚSQUEDA PROPIO
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20), 
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 20,
+                                ),
                                 child: ElevatedButton.icon(
                                   onPressed: _ejecutarBuscador,
-                                  icon: const Icon(Icons.search_rounded, size: 24),
+                                  icon: const Icon(
+                                    Icons.search_rounded,
+                                    size: 24,
+                                  ),
                                   label: const Text(
                                     "BUSCAR CONTENIDOS Y PDA",
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w800, 
-                                      letterSpacing: 1.1,          
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.1,
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: zacTinto,     
-                                    foregroundColor: Colors.white,  
-                                    elevation: 3,                  
-                                    minimumSize: const Size(double.infinity, 55),
+                                    backgroundColor: zacTinto,
+                                    foregroundColor: Colors.white,
+                                    elevation: 3,
+                                    minimumSize: const Size(
+                                      double.infinity,
+                                      55,
+                                    ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15), 
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
                                     // Efecto visual al presionar
-                                    padding: const EdgeInsets.symmetric(horizontal: 20), 
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
                                   ),
                                 ),
                               ),
-
                               _buildCustomDropdown(
                                 value: _ejesArticuladores,
                                 label: "Ejes Articuladores",
@@ -397,7 +452,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               _buildEscenariosSection(),
                               _customField(
                                 _necesidadesCtrl,
-                                "Necesidades BAP",
+                                "Necesidades, Intereses, Problematicas (NIP) y Barreras para el Aprendizaje y la Participación (BAP)",
                                 Icons.assist_walker,
                                 "Describa barreras...",
                               ),
@@ -499,6 +554,47 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
   // --- WIDGETS AUXILIARES ---
 
+  Widget _buildMultiSelectSection({
+    required String titulo,
+    required List<String> opciones,
+    required List<String> seleccionados,
+    required Function(String, bool) onSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          titulo,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: opciones.map((opt) {
+            final isSelected = seleccionados.contains(opt);
+            return FilterChip(
+              label: Text(
+                opt,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black87,
+                  fontSize: 11,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (val) => onSelected(opt, val),
+              selectedColor: zacTinto,
+              checkmarkColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
   Widget _buildSeccionTitulo(String titulo) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 8, top: 15),
@@ -569,16 +665,13 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, 
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             "Escenarios",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8), 
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -717,8 +810,10 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         nombreProyecto: _nombreProyectoCtrl.text,
         fechaEntrega: _FechaEntregaCtrl.text,
         nivelEducativo: _nivelEducativo,
-        condicionAlumnado: _condicionAlumnado,
-        faseEducativa: _faseEducativaCtrl.text,
+        //condicionAlumnado: _condicionAlumnado,
+        //faseEducativa: _faseEducativaCtrl.text,
+        faseEducativa: _fasesSeleccionadas.join(', '),
+        condicionAlumnado: _condicionesSeleccionadas.join(', '),
         grupo: _grupoCtrl.text,
         temporalidad: _temporalidadCtrl.text,
         necesidadesBap: _necesidadesCtrl.text,

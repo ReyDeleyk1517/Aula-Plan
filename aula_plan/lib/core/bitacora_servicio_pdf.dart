@@ -160,7 +160,7 @@ class BitacoraServicioPdf {
     );
   }
 
-  static pw.Widget _lineaFirma(String cargoOdocente) {
+  static pw.Widget _lineaFirma(String textofirma) {
     return pw.Column(
       children: [
         pw.Container(
@@ -170,7 +170,7 @@ class BitacoraServicioPdf {
           ),
         ),
         pw.SizedBox(height: 5),
-        pw.Text(cargoOdocente, style: const pw.TextStyle(fontSize: 8)),
+        pw.Text(textofirma, style: const pw.TextStyle(fontSize: 8)),
       ],
     );
   }

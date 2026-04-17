@@ -243,7 +243,7 @@ class _QuickSearchField extends StatelessWidget {
     return TextField(
       onChanged: (v) => context.read<PlaneacionCubit>().setFiltroProyecto(v),
       decoration: InputDecoration(
-        hintText: 'Buscar proyecto...',
+        hintText: 'Buscar planeacion...',
         prefixIcon: const Icon(Icons.search),
         filled: true,
         fillColor: const Color(0xFFF1F5F9),

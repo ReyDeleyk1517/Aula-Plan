@@ -38,6 +38,14 @@ class PlaneacionServicioPdf {
       fontWeight: pw.FontWeight.bold,
     );
 
+    final condicionesGuardadas = planeacion.condicionAlumnado.split(',').map((e) => e.trim());
+
+    bool tieneAS = condicionesGuardadas.contains("AS");
+    bool tieneD = condicionesGuardadas.contains("D");
+    bool tieneTEA = condicionesGuardadas.contains("TEA");
+    bool tieneTDAH = condicionesGuardadas.contains("TDAH");
+    bool tieneTE = condicionesGuardadas.contains("TE");
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.letter,
@@ -166,27 +174,27 @@ class PlaneacionServicioPdf {
                       children: [
                         _cuadritoConSigla(
                           "AS",
-                          planeacion.condicionAlumnado == "AS",
+                          tieneAS,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "D",
-                          planeacion.condicionAlumnado == "D",
+                          tieneD,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TEA",
-                          planeacion.condicionAlumnado == "TEA",
+                          tieneTEA,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TDAH",
-                          planeacion.condicionAlumnado == "TDAH",
+                          tieneTDAH,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TE",
-                          planeacion.condicionAlumnado == "TE",
+                          tieneTE,
                           estiloSigla,
                         ),
                       ],
@@ -634,6 +642,16 @@ class PlaneacionServicioPdf {
               ),
             ],
           ),
+
+          // Firmas
+          pw.SizedBox(height: 60),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+            children: [
+              _lineaFirma("Nombre y Firma del Docente"),
+              _lineaFirma("Vo.Bo. de la Dirección"),
+            ],
+          ),
         ],
       ),
     );
@@ -683,6 +701,8 @@ class PlaneacionServicioPdf {
       ],
     );
   }
+
+
 
   // Helper para las etiquetas laterales (25% ancho, gris)
   static pw.Widget _celdaEtiquetaLateral(String texto, pw.TextStyle estilo) {
@@ -808,6 +828,21 @@ class PlaneacionServicioPdf {
           ),
         ],
       ),
+    );
+  }
+
+  static pw.Widget _lineaFirma(String textofirma) {
+    return pw.Column(
+      children: [
+        pw.Container(
+          width: 160,
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(bottom: pw.BorderSide(width: 0.5)),
+          ),
+        ),
+        pw.SizedBox(height: 5),
+        pw.Text(textofirma, style: const pw.TextStyle(fontSize: 8)),
+      ],
     );
   }
 }

@@ -43,7 +43,7 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'Planeaciones',
+          'Recursos',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -117,7 +117,7 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
               onChanged: (val) =>
                   context.read<RecursosDocenteCubit>().actualizarBusqueda(val),
               decoration: InputDecoration(
-                hintText: 'Buscar material o autor...',
+                hintText: 'Buscar recurso',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: const Color(0xFFF1F5F9), // El gris de planeaciones
