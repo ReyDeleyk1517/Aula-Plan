@@ -283,6 +283,8 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
           "Incidencias",
           "Evaluaciones",
           "Reuniones",
+          "Acompañamiento Padres",
+          "Acompañamiento Maestros",
           "Otros",
         ].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
         onChanged: (val) => setState(() => _categoria = val!),

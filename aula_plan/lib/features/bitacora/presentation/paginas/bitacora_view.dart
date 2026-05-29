@@ -180,6 +180,8 @@ class BitacoraView extends StatelessWidget {
           "Evaluaciones",
           "Clases",
           "Reuniones",
+          "Acompañamiento Padres",
+          "Acompañamiento Maestros",
           "Otros",
         ];
         return SizedBox(

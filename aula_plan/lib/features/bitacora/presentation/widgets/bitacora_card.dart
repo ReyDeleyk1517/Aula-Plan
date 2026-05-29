@@ -19,19 +19,50 @@ class BitacoraCard extends StatelessWidget {
 
   // Helper para centralizar la lógica de colores e iconos por categoría
   _CategoryStyle _getCategoryStyle(String categoria) {
-    switch (categoria) {
-      case "Clases":
-        return const _CategoryStyle(Color(0xFF10B981), Icons.school_outlined);
-      case "Incidencias":
-        return const _CategoryStyle(Color(0xFFEF4444), Icons.report_problem_outlined);
-      case "Evaluaciones":
-        return const _CategoryStyle(Color(0xFFF59E0B), Icons.assignment_turned_in_outlined);
-      case "Reuniones":
-        return const _CategoryStyle(Color.fromARGB(255, 11, 210, 245), Icons.groups_outlined);
-      default:
-        return const _CategoryStyle(Color(0xFF64748B), Icons.bookmark_outline);
-    }
+  switch (categoria) {
+    case "Clases":
+      return const _CategoryStyle(
+        Color(0xFF10B981),
+        Icons.school_outlined,
+      );
+
+    case "Incidencias":
+      return const _CategoryStyle(
+        Color(0xFFEF4444),
+        Icons.report_problem_outlined,
+      );
+
+    case "Evaluaciones":
+      return const _CategoryStyle(
+        Color(0xFFF59E0B),
+        Icons.assignment_turned_in_outlined,
+      );
+
+    case "Reuniones":
+      return const _CategoryStyle(
+        Color.fromARGB(255, 11, 210, 245),
+        Icons.groups_outlined,
+      );
+
+    case "Acompañamiento Padres":
+      return const _CategoryStyle(
+        Color(0xFF8B5CF6),
+        Icons.family_restroom_outlined,
+      );
+
+    case "Acompañamiento Maestros":
+      return const _CategoryStyle(
+        Color(0xFF3B82F6),
+        Icons.support_agent_outlined,
+      );
+
+    default:
+      return const _CategoryStyle(
+        Color(0xFF64748B),
+        Icons.bookmark_outline,
+      );
   }
+}
 
   @override
   Widget build(BuildContext context) {

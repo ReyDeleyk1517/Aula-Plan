@@ -101,7 +101,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
     _nivelEducativo = p?.nivelEducativo ?? "INI";
 
-    // En initState...
     final fasesString = p?.faseEducativa ?? '';
     _fasesSeleccionadas = fasesString
         .split(',')
@@ -117,7 +116,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
     _ejesArticuladores = p?.ejesArticuladores ?? "Inclusión";
 
-    //escenarios
     final tokens = (p?.escenarios ?? '').split(',').map((s) => s.trim());
     _escAulicoSelected = tokens.contains('Aulico');
     _escEscolarSelected = tokens.contains('Escolar');
@@ -134,17 +132,13 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         .toList();
   }
 
-  // Convierte texto en una lista de viñetas, separadas por una línea en blanco entre ítems
-  // Esta función ahora es más robusta y evita duplicados de viñetas
   void _smartAppend(TextEditingController ctrl, String nuevoTexto) {
     if (nuevoTexto.trim().isEmpty) return;
 
-    // Convertimos el nuevo texto en viñetas limpias
     final formatted = _bulletize(nuevoTexto);
     if (formatted.isEmpty) return;
 
     final currentRaw = ctrl.text.trim();
-    // Si ya hay texto, agregamos dos saltos de línea para separar bloques
     final prefix = currentRaw.isEmpty ? '' : '\n\n';
 
     setState(() {
@@ -157,32 +151,25 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         .split('\n')
         .map((linea) => linea.trim())
         .where((linea) => linea.isNotEmpty)
-        // Evitamos agregar un guion si la línea ya empieza con uno
         .map((linea) => linea.startsWith('-') ? linea : '- $linea')
         .join('\n\n');
   }
 
   void _ejecutarBuscador() async {
-    // Ahora recibimos el mapa agrupado por campos
     final resultado = await showDialog<Map<String, Map<String, List<String>>>>(
       context: context,
       builder: (context) => BuscadorContenidosDialog(
-        fasesHabilitadas: _fasesSeleccionadas, // Pasamos la lista de fases
+        fasesHabilitadas: _fasesSeleccionadas,
       ),
     );
 
     if (resultado != null && resultado.isNotEmpty) {
-      // Recorremos cada campo que tenga selecciones (LEN, SyPC, etc.)
       resultado.forEach((campo, contenidosMap) {
-        // 1. Preparamos el texto de Contenidos para este campo
         final String contenidosTexto = contenidosMap.keys.join('\n');
-
-        // 2. Preparamos los PDAs para este campo
         final String pdasTexto = contenidosMap.values
             .expand((lista) => lista)
             .join('\n');
 
-        // 3. Identificamos el controlador correcto y usamos _smartAppend
         switch (campo) {
           case 'LEN':
             _smartAppend(_contenidosLenguajeCtrl, contenidosTexto);
@@ -198,7 +185,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
             break;
         }
 
-        // 4. Agregamos los PDAs al controlador general con un separador de campo
         if (pdasTexto.isNotEmpty) {
           _smartAppend(
             _pdaCtrl,
@@ -209,7 +195,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     }
   }
 
-  // Función auxiliar para que el separador de PDA se vea bien
   String _nombresCompletos(String campo) {
     const nombres = {
       'LEN': 'Lenguajes',
@@ -261,271 +246,272 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                 children: [
                   Form(
                     key: _formKey,
-                    child: ListView(
+                    child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
-                      children: [
-                        _buildSeccionTitulo("DATOS GENERALES"),
-                        _cardWrapper([
-                          _customField(
-                            _nombreProyectoCtrl,
-                            "Proyecto",
-                            Icons.auto_stories,
-                            "Nombre del proyecto...",
-                          ),
-                          _customField(
-                            _nombreEscuelaCtrl,
-                            "Escuela",
-                            Icons.school,
-                            "Nombre de la escuela...",
-                          ),
-                          _customField(
-                            _FechaEntregaCtrl,
-                            "Fecha de entrega",
-                            Icons.event_available,
-                            "Selecciona...",
-                            readOnly: true,
-                            onTap: () => _seleccionarFechaCalendario(context),
-                          ),
-                          _buildCustomDropdown(
-                            value: _nivelEducativo,
-                            label: "Nivel Educativo",
-                            icon: Icons.layers,
-                            options: ["INI", "PREE", "PRIM", "SEC", "BACH"],
-                            onChanged: (val) =>
-                                setState(() => _nivelEducativo = val!),
-                          ),
-                          _customField(
-                            _cicloEscolarCtrl,
-                            "Ciclo Escolar",
-                            Icons.calendar_month,
-                            "2024-2025",
-                          ),
-                          _buildMultiSelectSection(
-                            titulo: "Condición del Alumnado",
-                            opciones: [
-                              "AS",
-                              "D",
-                              "TEA",
-                              "TDAH",
-                              "TE",
-                              "Regular",
-                            ],
-                            seleccionados: _condicionesSeleccionadas,
-                            onSelected: (opt, val) {
-                              setState(() {
-                                val
-                                    ? _condicionesSeleccionadas.add(opt)
-                                    : _condicionesSeleccionadas.remove(opt);
-                              });
-                            },
-                          ),
-                          _buildMultiSelectSection(
-                            titulo: "Fases Educativas",
-                            opciones: [
-                              "Fase 2",
-                              "Fase 3",
-                              "Fase 4",
-                              "Fase 5",
-                              "Fase 6",
-                            ],
-                            seleccionados: _fasesSeleccionadas,
-                            onSelected: (opt, val) {
-                              setState(() {
-                                val
-                                    ? _fasesSeleccionadas.add(opt)
-                                    : _fasesSeleccionadas.remove(opt);
-                              });
-                            },
-                          ),
-                          _customField(
-                            _grupoCtrl,
-                            "Grado y Grupo",
-                            Icons.group,
-                            "6B...",
-                          ),
-                          _customField(
-                            _disciplinaCtrl,
-                            "Disciplina",
-                            Icons.air,
-                            "Disciplina...",
-                          ),
-                        ]),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSeccionTitulo("DATOS GENERALES"),
+                          _cardWrapper([
+                            _customField(
+                              _nombreProyectoCtrl,
+                              "Proyecto",
+                              Icons.auto_stories,
+                              "Nombre del proyecto...",
+                            ),
+                            _customField(
+                              _nombreEscuelaCtrl,
+                              "Escuela",
+                              Icons.school,
+                              "Nombre de la escuela...",
+                            ),
+                            _customField(
+                              _FechaEntregaCtrl,
+                              "Fecha de entrega",
+                              Icons.event_available,
+                              "Selecciona...",
+                              readOnly: true,
+                              onTap: () => _seleccionarFechaCalendario(context),
+                            ),
+                            _buildCustomDropdown(
+                              value: _nivelEducativo,
+                              label: "Nivel Educativo",
+                              icon: Icons.layers,
+                              options: ["INI", "PREE", "PRIM", "SEC", "BACH"],
+                              onChanged: (val) =>
+                                  setState(() => _nivelEducativo = val!),
+                            ),
+                            _customField(
+                              _cicloEscolarCtrl,
+                              "Ciclo Escolar",
+                              Icons.calendar_month,
+                              "2024-2025",
+                            ),
+                            _buildMultiSelectSection(
+                              titulo: "Condición del Alumnado",
+                              opciones: [
+                                "AS",
+                                "D",
+                                "TEA",
+                                "TDAH",
+                                "TE",
+                                "Regular",
+                              ],
+                              seleccionados: _condicionesSeleccionadas,
+                              onSelected: (opt, val) {
+                                setState(() {
+                                  val
+                                      ? _condicionesSeleccionadas.add(opt)
+                                      : _condicionesSeleccionadas.remove(opt);
+                                });
+                              },
+                            ),
+                            _buildMultiSelectSection(
+                              titulo: "Fases Educativas",
+                              opciones: [
+                                "Fase 2",
+                                "Fase 3",
+                                "Fase 4",
+                                "Fase 5",
+                                "Fase 6",
+                              ],
+                              seleccionados: _fasesSeleccionadas,
+                              onSelected: (opt, val) {
+                                setState(() {
+                                  val
+                                      ? _fasesSeleccionadas.add(opt)
+                                      : _fasesSeleccionadas.remove(opt);
+                                });
+                              },
+                            ),
+                            _customField(
+                              _grupoCtrl,
+                              "Grado y Grupo",
+                              Icons.group,
+                              "6B...",
+                            ),
+                            _customField(
+                              _disciplinaCtrl,
+                              "Disciplina",
+                              Icons.air,
+                              "Disciplina...",
+                            ),
+                          ]),
 
-                        _buildSeccionTitulo("CAMPOS FORMATIVOS Y CONTENIDO PEDAGÓGICO"),
-                        _cardWrapper([
-                          _customField(
-                            _contenidosLenguajeCtrl,
-                            "Contenidos - Lenguaje",
-                            Icons.list_alt,
-                            "Contenido...",
-                            maxLines: 5,
-                          ),
-                          _customField(
-                            _contenidosSaberesCtrl,
-                            "Contenidos - Saberes y pensamiento cientifico",
-                            Icons.list_alt,
-                            "Contenido...",
-                            maxLines: 5,
-                          ),
-                          _customField(
-                            _contenidosHumanosCtrl,
-                            "Contenidos - De lo humno y comunitario",
-                            Icons.list_alt,
-                            "Contenido...",
-                            maxLines: 5,
-                          ),
-                          _customField(
-                            _contenidosEticaCtrl,
-                            "Contenidos - Ética naturaleza y sociedad",
-                            Icons.list_alt,
-                            "Contenido...",
-                            maxLines: 5,
-                          ),
-                          _customField(
-                            _pdaCtrl,
-                            "PDA",
-                            Icons.ads_click,
-                            "Procesos de desarrollo...",
-                            maxLines: 8,
-                          ),
-                          _customField(
-                            _problematicaCtrl,
-                            "Problemática",
-                            Icons.warning,
-                            "Describe la problemática...",
-                            maxLines: 3,
-                          ),
-                          // Nuevo: campo para fase_momento_etapa
-                          _customField(
-                            _faseMomentoEtapaCtrl,
-                            "Fase Momento Etapa",
-                            Icons.timeline,
-                            "Describe la fase, momento o etapa...",
-                            maxLines: 2,
-                          ),
+                          _buildSeccionTitulo("CAMPOS FORMATIVOS Y CONTENIDO PEDAGÓGICO"),
+                          _cardWrapper([
+                            _customField(
+                              _contenidosLenguajeCtrl,
+                              "Contenidos - Lenguaje",
+                              Icons.list_alt,
+                              "Contenido...",
+                              maxLines: 5,
+                            ),
+                            _customField(
+                              _contenidosSaberesCtrl,
+                              "Contenidos - Saberes y pensamiento cientifico",
+                              Icons.list_alt,
+                              "Contenido...",
+                              maxLines: 5,
+                            ),
+                            _customField(
+                              _contenidosHumanosCtrl,
+                              "Contenidos - De lo humano y comunitario",
+                              Icons.list_alt,
+                              "Contenido...",
+                              maxLines: 5,
+                            ),
+                            _customField(
+                              _contenidosEticaCtrl,
+                              "Contenidos - Ética naturaleza y sociedad",
+                              Icons.list_alt,
+                              "Contenido...",
+                              maxLines: 5,
+                            ),
+                            _customField(
+                              _pdaCtrl,
+                              "PDA",
+                              Icons.ads_click,
+                              "Procesos de desarrollo...",
+                              maxLines: 8,
+                            ),
+                            _customField(
+                              _problematicaCtrl,
+                              "Problemática",
+                              Icons.warning,
+                              "Describe la problemática...",
+                              maxLines: 3,
+                            ),
+                            _customField(
+                              _faseMomentoEtapaCtrl,
+                              "Fase Momento Etapa",
+                              Icons.timeline,
+                              "Describe la fase, momento o etapa...",
+                              maxLines: 2,
+                            ),
 
-                          // BOTÓN DE BÚSQUEDA PROPIO
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: ElevatedButton.icon(
-                              onPressed: _ejecutarBuscador,
-                              icon: const Icon(Icons.search_rounded, size: 24),
-                              label: const Text(
-                                "BUSCAR CONTENIDOS Y PDA",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.1,
+                            // BOTÓN DE BÚSQUEDA
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: ElevatedButton.icon(
+                                onPressed: _ejecutarBuscador,
+                                icon: const Icon(Icons.search_rounded, size: 24),
+                                label: const Text(
+                                  "BUSCAR CONTENIDOS Y PDA",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.1,
+                                  ),
                                 ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: zacTinto,
-                                foregroundColor: Colors.white,
-                                elevation: 3,
-                                minimumSize: const Size(double.infinity, 55),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                // Efecto visual al presionar
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: zacTinto,
+                                  foregroundColor: Colors.white,
+                                  elevation: 3,
+                                  minimumSize: const Size(double.infinity, 55),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          _buildCustomDropdown(
-                            value: _ejesArticuladores,
-                            label: "Ejes Articuladores",
-                            icon: Icons.hub,
-                            options: [
-                              "Inclusión",
-                              "Artes y expresión estética",
-                              "Interculturalidad crítica",
-                              "Pensamiento crítico",
-                              "Apropiación de las culturas",
-                              "Igualdad de género",
-                              "Vida saludable",
-                            ],
-                            onChanged: (val) =>
-                                setState(() => _ejesArticuladores = val!),
-                          ),
-                          _buildEscenariosSection(),
-                          _customField(
-                            _necesidadesCtrl,
-                            "Necesidades, Intereses, Problematicas (NIP) y Barreras para el Aprendizaje y la Participación (BAP)",
-                            Icons.assist_walker,
-                            "Describa barreras...",
-                          ),
-                          _customField(
-                            _metodologiaCtrl,
-                            "Metodología",
-                            Icons.account_tree,
-                            "ABP, STEAM...",
-                          ),
-                          _customField(
-                            _temporalidadCtrl,
-                            "Temporalidad",
-                            Icons.timer,
-                            "Quincenal...",
-                          ),
-                        ]),
+                            _buildCustomDropdown(
+                              value: _ejesArticuladores,
+                              label: "Ejes Articuladores",
+                              icon: Icons.hub,
+                              options: [
+                                "Inclusión",
+                                "Artes y expresión estética",
+                                "Interculturalidad crítica",
+                                "Pensamiento crítico",
+                                "Apropiación de las culturas",
+                                "Igualdad de género",
+                                "Vida saludable",
+                              ],
+                              onChanged: (val) =>
+                                  setState(() => _ejesArticuladores = val!),
+                            ),
+                            _buildEscenariosSection(),
+                            _customField(
+                              _necesidadesCtrl,
+                              "Necesidades, Intereses, Problematicas (NIP) y Barreras para el Aprendizaje y la Participación (BAP)",
+                              Icons.assist_walker,
+                              "Describa barreras...",
+                            ),
+                            _customField(
+                              _metodologiaCtrl,
+                              "Metodología",
+                              Icons.account_tree,
+                              "ABP, STEAM...",
+                            ),
+                            _customField(
+                              _temporalidadCtrl,
+                              "Temporalidad",
+                              Icons.timer,
+                              "Quincenal...",
+                            ),
+                          ]),
 
-                        _buildSeccionTitulo("ACTIVIDADES"),
-                        ActividadesWidget(
-                          initial: _actividades,
-                          onChanged: (n) => _actividades = n,
-                        ),
-                        const SizedBox(height: 15),
-                        _cardWrapper([
-                          _customField(
-                            _organizacionGrupoCtrl,
-                            "Organización",
-                            Icons.groups_3,
-                            "Grupal, equipos...",
+                          _buildSeccionTitulo("ACTIVIDADES"),
+                          ActividadesWidget(
+                            initial: _actividades,
+                            onChanged: (n) => _actividades = n,
                           ),
-                          _customField(
-                            _espacioCtrl,
-                            "Espacio",
-                            Icons.place,
-                            "Aula, patio...",
-                          ),
-                          _customField(
-                            _tiempoCtrl,
-                            "Tiempo estimado",
-                            Icons.hourglass_top,
-                            "45 min...",
-                          ),
-                          _customField(
-                            _responsablesCtrl,
-                            "Responsables",
-                            Icons.person_search,
-                            "Docente, apoyo...",
-                          ),
-                        ]),
+                          const SizedBox(height: 15),
+                          _cardWrapper([
+                            _customField(
+                              _organizacionGrupoCtrl,
+                              "Organización",
+                              Icons.groups_3,
+                              "Grupal, equipos...",
+                            ),
+                            _customField(
+                              _espacioCtrl,
+                              "Espacio",
+                              Icons.place,
+                              "Aula, patio...",
+                            ),
+                            _customField(
+                              _tiempoCtrl,
+                              "Tiempo estimado",
+                              Icons.hourglass_top,
+                              "45 min...",
+                            ),
+                            _customField(
+                              _responsablesCtrl,
+                              "Responsables",
+                              Icons.person_search,
+                              "Docente, apoyo...",
+                            ),
+                          ]),
 
-                        _buildSeccionTitulo("EVALUACIÓN"),
-                        _cardWrapper([
-                          _customField(
-                            _indicadoresCtrl,
-                            "Indicadores",
-                            Icons.checklist_rtl,
-                            "Qué evaluar...",
-                          ),
-                          _customField(
-                            _instrumentosCtrl,
-                            "Instrumentos",
-                            Icons.architecture,
-                            "Rúbrica...",
-                          ),
-                          _customField(
-                            _observacionesCtrl,
-                            "Observaciones",
-                            Icons.note_alt,
-                            "Notas...",
-                            maxLines: 3,
-                          ),
-                        ]),
-                        const SizedBox(height: 100),
-                      ],
+                          _buildSeccionTitulo("EVALUACIÓN"),
+                          _cardWrapper([
+                            _customField(
+                              _indicadoresCtrl,
+                              "Indicadores",
+                              Icons.checklist_rtl,
+                              "Qué evaluar...",
+                            ),
+                            _customField(
+                              _instrumentosCtrl,
+                              "Instrumentos",
+                              Icons.architecture,
+                              "Rúbrica...",
+                            ),
+                            _customField(
+                              _observacionesCtrl,
+                              "Observaciones",
+                              Icons.note_alt,
+                              "Notas...",
+                              maxLines: 3,
+                            ),
+                          ]),
+                          const SizedBox(height: 100),
+                        ],
+                      ),
                     ),
                   ),
                   if (status == FormStatus.cargando)
@@ -539,7 +525,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
         floatingActionButton: Builder(
           builder: (contextInner) {
             return _buildBotonGuardar(contextInner);
@@ -575,7 +560,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC), // Mismo fondo que los TextFields
+            color: const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.black.withOpacity(0.05)),
           ),
@@ -692,6 +677,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         maxLines: maxLines,
         readOnly: readOnly,
         onTap: onTap,
+        keyboardType: maxLines > 1 ? TextInputType.multiline : TextInputType.text,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon, size: 22, color: zacTinto.withOpacity(0.7)),
@@ -860,13 +846,11 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     }
   }
 
-  // Agrega el parámetro BuildContext
   Widget _buildBotonGuardar(BuildContext context) {
     return Container(
       height: 55,
       margin: const EdgeInsets.symmetric(horizontal: 24),
       child: ElevatedButton.icon(
-        // Pasamos el contexto aquí
         onPressed: () => _guardar(context),
         icon: const Icon(Icons.save_as, color: Colors.white),
         label: const Text(
@@ -893,8 +877,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         nombreProyecto: _nombreProyectoCtrl.text,
         fechaEntrega: _FechaEntregaCtrl.text,
         nivelEducativo: _nivelEducativo,
-        //condicionAlumnado: _condicionAlumnado,
-        //faseEducativa: _faseEducativaCtrl.text,
         faseEducativa: _fasesSeleccionadas.join(', '),
         condicionAlumnado: _condicionesSeleccionadas.join(', '),
         grupo: _grupoCtrl.text,
