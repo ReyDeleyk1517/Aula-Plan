@@ -48,10 +48,24 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
   late List<String> _fasesSeleccionadas;
   late List<String> _condicionesSeleccionadas;
+  late List<String> _acompanamientosSeleccionados; // Nueva lista para selección múltiple
 
   late String _nivelEducativo, _ejesArticuladores;
   late bool _escAulicoSelected, _escEscolarSelected, _escComunitarioSelected;
+  late bool _escFamiliarSelected;
   late List<Map<String, String>> _actividades;
+
+  // Lista oficial de los 8 tipos de acompañamiento obtenidos del PDF
+  final List<String> _opcionesAcompanamiento = [
+    "1. Ayudar a un alumno y sentarse a su lado",
+    "2. Ayudar a un alumno aumentando progresivamente la distancia",
+    "3. Se agrupan temporalmente unos alumnos dentro del aula",
+    "4. La maestra especialista se va desplazando por el aula apoyando a todos los alumnos",
+    "5. Trabajo en grupos heterogéneos: trabajo cooperativo",
+    "6. Los dos maestros conducen la actividad conjuntamente y dirigen el grupo juntos",
+    "7. La maestra especialista conduce la actividad",
+    "8. La maestra especialista prepara material para la clase",
+  ];
 
   @override
   void initState() {
@@ -107,9 +121,18 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
+
     final condicionesString = p?.condicionAlumnado ?? '';
     _condicionesSeleccionadas = condicionesString
         .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    // Inicialización de los acompañamientos guardados previamente
+    final acompanamientosString = p?.acompanamientos ?? '';
+    _acompanamientosSeleccionados = acompanamientosString
+        .split(';') // Usamos punto y coma como separador recomendado debido al largo del texto
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
@@ -120,6 +143,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     _escAulicoSelected = tokens.contains('Aulico');
     _escEscolarSelected = tokens.contains('Escolar');
     _escComunitarioSelected = tokens.contains('Comunitario');
+    _escFamiliarSelected = tokens.contains('Familiar');
 
     _actividades = (p?.actividades ?? [])
         .map(
@@ -158,9 +182,8 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
   void _ejecutarBuscador() async {
     final resultado = await showDialog<Map<String, Map<String, List<String>>>>(
       context: context,
-      builder: (context) => BuscadorContenidosDialog(
-        fasesHabilitadas: _fasesSeleccionadas,
-      ),
+      builder: (context) =>
+          BuscadorContenidosDialog(fasesHabilitadas: _fasesSeleccionadas),
     );
 
     if (resultado != null && resultado.isNotEmpty) {
@@ -336,9 +359,25 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               Icons.air,
                               "Disciplina...",
                             ),
+                            
+                            // SECCIÓN DE SELECCIÓN MÚLTIPLE DE ACOMPAÑAMIENTOS CON LOS TIPOS DEL PDF
+                            _buildMultiSelectSection(
+                              titulo: "Tipos de Acompañamiento (Maestros en el Aula)",
+                              opciones: _opcionesAcompanamiento,
+                              seleccionados: _acompanamientosSeleccionados,
+                              onSelected: (opt, val) {
+                                setState(() {
+                                  val
+                                      ? _acompanamientosSeleccionados.add(opt)
+                                      : _acompanamientosSeleccionados.remove(opt);
+                                });
+                              },
+                            ),
                           ]),
 
-                          _buildSeccionTitulo("CAMPOS FORMATIVOS Y CONTENIDO PEDAGÓGICO"),
+                          _buildSeccionTitulo(
+                            "CAMPOS FORMATIVOS Y CONTENIDO PEDAGÓGICO",
+                          ),
                           _cardWrapper([
                             _customField(
                               _contenidosLenguajeCtrl,
@@ -389,13 +428,17 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               "Describe la fase, momento o etapa...",
                               maxLines: 2,
                             ),
+                            
 
                             // BOTÓN DE BÚSQUEDA
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               child: ElevatedButton.icon(
                                 onPressed: _ejecutarBuscador,
-                                icon: const Icon(Icons.search_rounded, size: 24),
+                                icon: const Icon(
+                                  Icons.search_rounded,
+                                  size: 24,
+                                ),
                                 label: const Text(
                                   "BUSCAR CONTENIDOS Y PDA",
                                   style: TextStyle(
@@ -605,14 +648,17 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                         color: isSelected ? Colors.white : zacTinto,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        opt,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : zacTinto,
-                          fontSize: 12,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
+                      // Flexible añadido por si los textos de acompañamiento son muy largos en pantallas chicas
+                      Flexible(
+                        child: Text(
+                          opt,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : zacTinto,
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -677,7 +723,9 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         maxLines: maxLines,
         readOnly: readOnly,
         onTap: onTap,
-        keyboardType: maxLines > 1 ? TextInputType.multiline : TextInputType.text,
+        keyboardType: maxLines > 1
+            ? TextInputType.multiline
+            : TextInputType.text,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon, size: 22, color: zacTinto.withOpacity(0.7)),
@@ -701,7 +749,8 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
-            "Escenarios",
+            //en texto debe decir contexto 
+            "Contextos",
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -735,6 +784,11 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                 "Comunitario",
                 _escComunitarioSelected,
                 (v) => setState(() => _escComunitarioSelected = v),
+              ),
+              _buildChip(
+                "Familiar",
+                _escFamiliarSelected,
+                (v) => setState(() => _escFamiliarSelected = v),
               ),
             ],
           ),
@@ -895,6 +949,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
           _escAulicoSelected ? 'Aulico' : '',
           _escEscolarSelected ? 'Escolar' : '',
           _escComunitarioSelected ? 'Comunitario' : '',
+          _escFamiliarSelected ? 'Familiar' : '',
         ].where((s) => s.isNotEmpty).join(', '),
         metodologia: _metodologiaCtrl.text,
         observaciones: _observacionesCtrl.text,
@@ -916,8 +971,14 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         evaluacionInstrumentos: _instrumentosCtrl.text,
         problematica: _problematicaCtrl.text,
         faseMomentoEtapa: _faseMomentoEtapaCtrl.text,
+        
+        // Se unen las opciones seleccionadas por un punto y coma (;), si está vacío se envía null
+        acompanamientos: _acompanamientosSeleccionados.isNotEmpty
+            ? _acompanamientosSeleccionados.join('; ')
+            : null,
       );
       context.read<PlaneacionCrearEditarCubit>().procesarPlaneacion(entidad);
     }
   }
 }
+

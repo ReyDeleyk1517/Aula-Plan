@@ -34,6 +34,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
     required String problematica,
     String? fechaCreacion,
     String? faseMomentoEtapa,
+    String? acompanamientos,
     List<ActividadPlaneacionModelo> actividades = const [],
   }) : super(
          id: id,
@@ -71,6 +72,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
          problematica: problematica,
          fechaCreacion: fechaCreacion,
          faseMomentoEtapa: faseMomentoEtapa,
+         acompanamientos: acompanamientos,
          actividades: actividades,
        );
 
@@ -84,6 +86,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       cicloEscolar: mapa['ciclo_escolar'],
       fechaEntrega: mapa['fecha_entrega'],
       faseMomentoEtapa: mapa['fase_momento_etapa'],
+      acompanamientos: mapa['acompanamientos'],
       nombreEscuela: mapa['nombre_escuela'],
       nivelEducativo: mapa['nivel_educativo'],
       faseEducativa: mapa['fase_educativa'],
@@ -155,6 +158,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       'evaluacion_indicadores': evaluacionIndicadores,
       'evaluacion_instrumentos': evaluacionInstrumentos,
       'problematica': problematica,
+      'acompanamientos': acompanamientos,
     };
   }
 
@@ -195,6 +199,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       evaluacionIndicadores: entidad.evaluacionIndicadores,
       evaluacionInstrumentos: entidad.evaluacionInstrumentos,
       problematica: entidad.problematica,
+      acompanamientos: entidad.acompanamientos,
       // Mapear actividades
       actividades: entidad.actividades
           .map((a) => ActividadPlaneacionModelo.fromEntity(a))

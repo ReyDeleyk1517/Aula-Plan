@@ -49,7 +49,7 @@ class DbHelper {
 
     return await openDatabase(
       ruta,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         // --- Tabla Perfil ---
         await db.execute('''
@@ -131,6 +131,7 @@ class DbHelper {
             evaluacion_instrumentos TEXT,
             observaciones TEXT,
             problematica TEXT,
+            acompanamientos TEXT,
             FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
           )
         ''');
@@ -161,6 +162,15 @@ class DbHelper {
             FOREIGN KEY (perfil_id) REFERENCES $perfilTable(id) ON DELETE CASCADE
           )
         ''');
+      },
+      // DISPARADOR ONUPGRADE PARA USUARIOS EXISTENTES
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Ejecuta la alteración de la tabla agregando la columna si vienen de la versión 1
+          await db.execute('''
+            ALTER TABLE $planeacionTable ADD COLUMN acompanamientos TEXT
+          ''');
+        }
       },
       onConfigure: (db) async {
         // Habilitar claves foráneas para que ON DELETE CASCADE funcione

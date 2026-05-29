@@ -19,57 +19,51 @@ class BitacoraCard extends StatelessWidget {
 
   // Helper para centralizar la lógica de colores e iconos por categoría
   _CategoryStyle _getCategoryStyle(String categoria) {
-  switch (categoria) {
-    case "Clases":
-      return const _CategoryStyle(
-        Color(0xFF10B981),
-        Icons.school_outlined,
-      );
+    switch (categoria) {
+      case "Clases":
+        return const _CategoryStyle(Color(0xFF10B981), Icons.school_outlined);
 
-    case "Incidencias":
-      return const _CategoryStyle(
-        Color(0xFFEF4444),
-        Icons.report_problem_outlined,
-      );
+      case "Incidencias":
+        return const _CategoryStyle(
+          Color(0xFFEF4444),
+          Icons.report_problem_outlined,
+        );
 
-    case "Evaluaciones":
-      return const _CategoryStyle(
-        Color(0xFFF59E0B),
-        Icons.assignment_turned_in_outlined,
-      );
+      case "Evaluaciones":
+        return const _CategoryStyle(
+          Color(0xFFF59E0B),
+          Icons.assignment_turned_in_outlined,
+        );
 
-    case "Reuniones":
-      return const _CategoryStyle(
-        Color.fromARGB(255, 11, 210, 245),
-        Icons.groups_outlined,
-      );
+      case "Reuniones":
+        return const _CategoryStyle(
+          Color.fromARGB(255, 11, 210, 245),
+          Icons.groups_outlined,
+        );
 
-    case "Acompañamiento Padres":
-      return const _CategoryStyle(
-        Color(0xFF8B5CF6),
-        Icons.family_restroom_outlined,
-      );
+      case "Acompañamiento Padres":
+        return const _CategoryStyle(
+          Color(0xFF8B5CF6),
+          Icons.family_restroom_outlined,
+        );
 
-    case "Acompañamiento Maestros":
-      return const _CategoryStyle(
-        Color(0xFF3B82F6),
-        Icons.support_agent_outlined,
-      );
+      case "Acompañamiento Maestros":
+        return const _CategoryStyle(
+          Color(0xFF3B82F6),
+          Icons.support_agent_outlined,
+        );
 
-    default:
-      return const _CategoryStyle(
-        Color(0xFF64748B),
-        Icons.bookmark_outline,
-      );
+      default:
+        return const _CategoryStyle(Color(0xFF64748B), Icons.bookmark_outline);
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     final style = _getCategoryStyle(registro.categoria);
 
     return Card(
-       margin: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
+      margin: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ClipRRect(
@@ -82,11 +76,8 @@ class BitacoraCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Indicador de color lateral corregido (No se desfasa en las esquinas)
-                Container(
-                  width: 6,
-                  color: style.color,
-                ),
-                
+                Container(width: 6, color: style.color),
+
                 // Contenido de la Tarjeta
                 Expanded(
                   child: Padding(
@@ -98,7 +89,11 @@ class BitacoraCard extends StatelessWidget {
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.access_time, size: 16, color: Color(0xFF64748B)),
+                            const Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Color(0xFF64748B),
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               registro.hora,
@@ -111,7 +106,7 @@ class BitacoraCard extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(width: 16),
-                        
+
                         // Contenido Principal
                         Expanded(
                           child: Column(
@@ -120,7 +115,11 @@ class BitacoraCard extends StatelessWidget {
                               // Header: Categoría
                               Row(
                                 children: [
-                                  Icon(style.icon, size: 14, color: style.color),
+                                  Icon(
+                                    style.icon,
+                                    size: 14,
+                                    color: style.color,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     registro.categoria.toUpperCase(),
@@ -134,7 +133,7 @@ class BitacoraCard extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 4),
-                              
+
                               // Título
                               Text(
                                 registro.titulo,
@@ -171,13 +170,17 @@ class BitacoraCard extends StatelessWidget {
                             IconButton(
                               visualDensity: VisualDensity.compact,
                               icon: Icon(
-                                estaSeleccionado ? Icons.check_circle : Icons.radio_button_unchecked,
-                                color: estaSeleccionado ? const Color(0xFF6366F1) : Colors.grey.shade400,
+                                estaSeleccionado
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: estaSeleccionado
+                                    ? const Color(0xFF6366F1)
+                                    : Colors.grey.shade400,
                                 size: 28,
                               ),
                               onPressed: onToggleSeleccion,
                             ),
-                            
+
                             // Oculta el espacio y el lápiz dinámicamente si está seleccionado
                             if (!estaSeleccionado) ...[
                               const SizedBox(height: 8),
@@ -205,7 +208,11 @@ class BitacoraCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow({required IconData icon, required String label, required String value}) {
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -213,14 +220,17 @@ class BitacoraCard extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: RichText(
-            maxLines: 2, 
-            overflow: TextOverflow.ellipsis, 
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             text: TextSpan(
               style: const TextStyle(fontSize: 13, color: Color(0xFF475569)),
               children: [
                 TextSpan(
                   text: "$label ",
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
                 TextSpan(text: value),
               ],
