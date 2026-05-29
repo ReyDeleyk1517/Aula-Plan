@@ -32,6 +32,10 @@ class PlaneacionEntidad {
   final String observaciones;
   // Nueva: problemática de la planeación
   final String problematica;
+  // Nueva: fecha de creación de la planeación
+  final String? fechaCreacion;
+  // Nueva: fase_momento_etapa
+  final String? faseMomentoEtapa;
 
   // Una planeación tiene múltiples actividades
   final List<ActividadPlaneacionEntidad> actividades;
@@ -68,6 +72,8 @@ class PlaneacionEntidad {
     required this.evaluacionInstrumentos,
     required this.observaciones,
     required this.problematica,
+    this.fechaCreacion,
+    this.faseMomentoEtapa,
     this.actividades = const [],
   });
 }

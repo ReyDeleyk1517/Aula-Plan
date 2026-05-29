@@ -7,17 +7,25 @@ import 'package:aula_plan/features/planeaciones/presentation/paginas/planeacion_
 import 'package:aula_plan/features/planeaciones/domain/entidades/planeacion_entidades.dart';
 import 'package:aula_plan/core/injection_container.dart' as di;
 
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:aula_plan/core/planeacion_servicio_pdf.dart'; // Asegúrate de que esta ruta sea correcta
+
 class PlaneacionListView extends StatelessWidget {
   const PlaneacionListView({Key? key}) : super(key: key);
 
-
-  Future<void> _irAPlaneacion(BuildContext context, {PlaneacionEntidad? planeacion}) async {
+  Future<void> _irAPlaneacion(
+    BuildContext context, {
+    PlaneacionEntidad? planeacion,
+  }) async {
     final resultado = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PlaneacionCrearEditarView(
-          planeacionExistente: planeacion,
-        ),
+        builder: (_) =>
+            PlaneacionCrearEditarView(planeacionExistente: planeacion),
       ),
     );
 
@@ -29,7 +37,7 @@ class PlaneacionListView extends StatelessWidget {
     }
   }
 
-  //Construcción de la Interfaz 
+  //Construcción de la Interfaz
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -37,7 +45,10 @@ class PlaneacionListView extends StatelessWidget {
       child: Scaffold(
         backgroundColor: const Color(0xFFF1F5F9),
         appBar: AppBar(
-          title: const Text('Planeaciones', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Planeaciones',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           elevation: 0,
           centerTitle: true,
         ),
@@ -47,25 +58,29 @@ class PlaneacionListView extends StatelessWidget {
             const Expanded(child: _PlaneacionListBuilder()),
           ],
         ),
-        floatingActionButton: _BotonFlotanteDinamico(irAPlaneacion: _irAPlaneacion),
+        floatingActionButton: _BotonFlotanteDinamico(
+          irAPlaneacion: _irAPlaneacion,
+        ),
       ),
     );
   }
 
   Widget _buildHeaderFiltros() {
-    return Builder(builder: (context) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.white,
-        child: Row(
-          children: [
-            Expanded(child: _QuickSearchField()),
-            const SizedBox(width: 12),
-            _AdvancedFilterBtn(),
-          ],
-        ),
-      );
-    });
+    return Builder(
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.white,
+          child: Row(
+            children: [
+              Expanded(child: _QuickSearchField()),
+              const SizedBox(width: 12),
+              _AdvancedFilterBtn(),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -78,13 +93,19 @@ class _PlaneacionListBuilder extends StatelessWidget {
 
     return BlocBuilder<PlaneacionCubit, PlaneacionState>(
       builder: (context, estado) {
-        if (estado.cargando) return const Center(child: CircularProgressIndicator());
-        
+        if (estado.cargando)
+          return const Center(child: CircularProgressIndicator());
+
         final lista = estado.planeacionesFiltradas;
         if (lista.isEmpty) return const Center(child: Text("Sin resultados"));
 
         return ListView.builder(
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 100),
+          padding: const EdgeInsets.only(
+            left: 12,
+            right: 12,
+            top: 12,
+            bottom: 250,
+          ),
           itemCount: lista.length,
           itemBuilder: (context, i) {
             final p = lista[i];
@@ -93,7 +114,12 @@ class _PlaneacionListBuilder extends StatelessWidget {
             return PlaneacionCard(
               planeacion: p,
               selected: esSeleccionado,
-              onSelected: () => context.read<PlaneacionCubit>().toggleSeleccion(p.id!),
+              onSelected: () =>
+                  context.read<PlaneacionCubit>().toggleSeleccion(p.id!),
+              onEditTap: () {
+                // Al tocar el lápiz, navega directo a la pantalla de edición
+                parent?._irAPlaneacion(context, planeacion: p);
+              },
               onTap: () {
                 if (estado.selectedPlaneacionIds.isNotEmpty) {
                   context.read<PlaneacionCubit>().toggleSeleccion(p.id!);
@@ -111,8 +137,64 @@ class _PlaneacionListBuilder extends StatelessWidget {
 
 class _BotonFlotanteDinamico extends StatelessWidget {
   final Function(BuildContext, {PlaneacionEntidad? planeacion}) irAPlaneacion;
-  
+
   const _BotonFlotanteDinamico({required this.irAPlaneacion});
+
+  Future<void> _compartirPdfDirecto(
+    BuildContext context,
+    PlaneacionEntidad planeacion,
+    String nombreDesdeModal,
+  ) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Preparando archivo..."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final directory = await getTemporaryDirectory();
+
+      // 1. Sanitizar el nombre que viene del modal
+      String nombreLimpio = nombreDesdeModal.trim().replaceAll(
+        RegExp(r'[\\/:*?"<>|]'),
+        '_',
+      );
+      if (nombreLimpio.isEmpty) nombreLimpio = "Planeacion";
+      if (!nombreLimpio.toLowerCase().endsWith('.pdf')) nombreLimpio += '.pdf';
+
+      final String rutaCompleta = p.join(directory.path, nombreLimpio);
+
+      // 2. Generar bytes
+      final Uint8List pdfBytes =
+          await PlaneacionServicioPdf.generarPdfPlaneacion(planeacion);
+
+      // 3. Escritura física
+      final File archivoTemporal = File(rutaCompleta);
+      await archivoTemporal.writeAsBytes(pdfBytes);
+
+      final box = context.findRenderObject() as RenderBox?;
+
+      // 4. Compartir
+      await Share.shareXFiles(
+        [XFile(rutaCompleta, mimeType: 'application/pdf')],
+        subject: 'Planeación: ${planeacion.nombreProyecto}',
+        text: 'Adjunto envío la planeación docente.',
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : null,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error al compartir: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,16 +212,50 @@ class _BotonFlotanteDinamico extends StatelessWidget {
                 FloatingActionButton.extended(
                   heroTag: "fab_pdf",
                   onPressed: () {
-                    final planeacion = estado.planeacionesFiltradas.firstWhere((p) => p.id == seleccionados.first);
-                    _mostrarModalNombrePdf(context, planeacion);
+                    final planeacion = estado.planeacionesFiltradas.firstWhere(
+                      (p) => p.id == seleccionados.first,
+                    );
+                    _mostrarModalNombreArchivo(
+                      context: context,
+                      nombreSugerido: planeacion.nombreProyecto,
+                      alConfirmar: (nombrePdf) => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PlaneacionPreviewPdf(
+                            planeacion: planeacion,
+                            nombre_archivo: nombrePdf,
+                          ),
+                        ),
+                      ),
+                    );
                   },
-                  label: const Text("Generar PDF"),
+                  label: const Text("Vista Previa PDF"),
                   icon: const Icon(Icons.picture_as_pdf),
                   backgroundColor: Colors.orange,
                 ),
                 const SizedBox(height: 12),
+
+                FloatingActionButton.extended(
+                  heroTag: "fab_share",
+                  onPressed: () {
+                    final planeacion = estado.planeacionesFiltradas.firstWhere(
+                      (p) => p.id == seleccionados.first,
+                    );
+                    _mostrarModalNombreArchivo(
+                      context: context,
+                      nombreSugerido: planeacion.nombreProyecto,
+                      alConfirmar: (nombrePdf) =>
+                          _compartirPdfDirecto(context, planeacion, nombrePdf),
+                    );
+                  },
+                  label: const Text("Compartir PDF"),
+                  icon: const Icon(Icons.share),
+                  backgroundColor: Colors.blueAccent,
+                ),
+
+                const SizedBox(height: 12),
               ],
-              
+
               // BOTÓN BORRAR: 1 o mas
               FloatingActionButton.extended(
                 heroTag: "fab_borrar",
@@ -154,7 +270,8 @@ class _BotonFlotanteDinamico extends StatelessWidget {
               FloatingActionButton(
                 heroTag: "fab_cancelar",
                 mini: true,
-                onPressed: () => context.read<PlaneacionCubit>().limpiarSeleccion(),
+                onPressed: () =>
+                    context.read<PlaneacionCubit>().limpiarSeleccion(),
                 backgroundColor: Colors.grey,
                 child: const Icon(Icons.close, color: Colors.white),
               ),
@@ -179,7 +296,10 @@ class _BotonFlotanteDinamico extends StatelessWidget {
         title: const Text("¿Eliminar planeaciones?"),
         content: const Text("Esta acción no se puede deshacer."),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(innerContext), child: const Text("Cancelar")),
+          TextButton(
+            onPressed: () => Navigator.pop(innerContext),
+            child: const Text("Cancelar"),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
@@ -193,9 +313,14 @@ class _BotonFlotanteDinamico extends StatelessWidget {
     );
   }
 
-  void _mostrarModalNombrePdf(BuildContext context, PlaneacionEntidad planeacion) {
+  void _mostrarModalNombreArchivo({
+    required BuildContext context,
+    required String nombreSugerido,
+    required Function(String nombreFinal) alConfirmar,
+  }) {
+    // Sanitizamos el nombre inicial para que no tenga espacios problemáticos
     final TextEditingController _controller = TextEditingController(
-      text: planeacion.nombreProyecto.replaceAll(RegExp(r'\\s+'), '_'),
+      text: nombreSugerido.replaceAll(RegExp(r'\s+'), '_'),
     );
 
     showDialog(
@@ -204,30 +329,26 @@ class _BotonFlotanteDinamico extends StatelessWidget {
         title: const Text("Nombre del archivo PDF"),
         content: TextField(
           controller: _controller,
+          autofocus: true,
           decoration: const InputDecoration(
             labelText: 'Nombre del archivo',
+            suffixText: '.pdf',
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(innerContext), child: const Text("Cancelar")),
+          TextButton(
+            onPressed: () => Navigator.pop(innerContext),
+            child: const Text("Cancelar"),
+          ),
           FilledButton(
             onPressed: () {
-              final archivo = _controller.text.trim();
-              if (archivo.isNotEmpty) {
-                final nombre_pdf = '$archivo.pdf';
+              final nombre = _controller.text.trim();
+              if (nombre.isNotEmpty) {
                 Navigator.pop(innerContext);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PlaneacionPreviewPdf(
-                      planeacion: planeacion,
-                      nombre_archivo: nombre_pdf,
-                    ),
-                  ),
-                );
+                alConfirmar("$nombre.pdf");
               }
             },
-            child: const Text("Generar"),
+            child: const Text("Aceptar"),
           ),
         ],
       ),
@@ -235,7 +356,7 @@ class _BotonFlotanteDinamico extends StatelessWidget {
   }
 }
 
-// Widgets de búsqueda y filtros 
+// Widgets de búsqueda y filtros
 
 class _QuickSearchField extends StatelessWidget {
   @override
@@ -247,7 +368,10 @@ class _QuickSearchField extends StatelessWidget {
         prefixIcon: const Icon(Icons.search),
         filled: true,
         fillColor: const Color(0xFFF1F5F9),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
         contentPadding: EdgeInsets.zero,
       ),
     );
@@ -262,7 +386,9 @@ class _AdvancedFilterBtn extends StatelessWidget {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
           builder: (_) => BlocProvider.value(
             value: context.read<PlaneacionCubit>(),
             child: const _FiltersSheet(),
@@ -276,38 +402,207 @@ class _AdvancedFilterBtn extends StatelessWidget {
 
 class _FiltersSheet extends StatelessWidget {
   const _FiltersSheet();
+
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PlaneacionCubit>();
-    final s = cubit.state;
+
     return Padding(
-      padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+      padding: EdgeInsets.only(
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("Filtros Avanzados", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 15),
-          _field("Escuela", Icons.school, s.filtroNombreEscuela, cubit.setFiltroEscuela),
-          _field("Ciclo Escolar", Icons.calendar_month, s.filtroCicloEscolar, cubit.setFiltroCiclo),
-          Row(children: [
-            Expanded(child: _field("Grado y Grupo", Icons.group, s.filtroGradoGrupo, cubit.setFiltroGrupo)),
-            const SizedBox(width: 10),
-            Expanded(child: _field("Fase", Icons.category, s.filtroFaseEducativa, cubit.setFiltroFase)),
-          ]),
-          _dropdownField(
-            label: "Nivel",
-            icon: Icons.layers,
-            value: s.filtroNivelEducativo.isEmpty ? null : s.filtroNivelEducativo,
-            options: ["","INI", "PREE", "PRIM", "SEC", "BACH"],
-            onChanged: (val) => cubit.setFiltroNivel(val ?? ""),
+          const Text(
+            "Filtros Avanzados",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 15),
+
+          // Usamos BlocBuilder para que los cambios en el estado
+          // se reflejen en tiempo real en los campos del modal.
+          BlocBuilder<PlaneacionCubit, PlaneacionState>(
+            builder: (context, state) {
+              return Column(
+                children: [
+                  _field(
+                    "Escuela",
+                    Icons.school,
+                    state.filtroNombreEscuela,
+                    cubit.setFiltroEscuela,
+                  ),
+                  _field(
+                    "Ciclo Escolar",
+                    Icons.calendar_month,
+                    state.filtroCicloEscolar,
+                    cubit.setFiltroCiclo,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _field(
+                          "Grado y Grupo",
+                          Icons.group,
+                          state.filtroGradoGrupo,
+                          cubit.setFiltroGrupo,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _field(
+                          "Fase",
+                          Icons.category,
+                          state.filtroFaseEducativa,
+                          cubit.setFiltroFase,
+                        ),
+                      ),
+                    ],
+                  ),
+                  _field(
+                    "Fase Momento Etapa",
+                    Icons.timeline,
+                    state.filtroFaseMomentoEtapa,
+                    cubit.setFiltroFaseMomentoEtapa,
+                  ),
+                  _dropdownField(
+                    label: "Nivel",
+                    icon: Icons.layers,
+                    value: state.filtroNivelEducativo.isEmpty
+                        ? null
+                        : state.filtroNivelEducativo,
+                    options: ["", "INI", "PREE", "PRIM", "SEC", "BACH"],
+                    onChanged: (val) => cubit.setFiltroNivel(val ?? ""),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Fila de Fechas Reactiva
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _datePickerField(
+                          context,
+                          label: 'Desde',
+                          value: state.filtroFechaCreacionDesde,
+                          onDateSelected: (v) =>
+                              cubit.setFiltroFechaCreacionDesde(v),
+                          onClear: () => cubit.setFiltroFechaCreacionDesde(""),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _datePickerField(
+                          context,
+                          label: 'Hasta',
+                          value: state.filtroFechaCreacionHasta,
+                          onDateSelected: (v) =>
+                              cubit.setFiltroFechaCreacionHasta(v),
+                          onClear: () => cubit.setFiltroFechaCreacionHasta(""),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF8B1D1D), minimumSize: const Size(double.infinity, 45)),
-            child: const Text("Ver resultados", style: TextStyle(color: Colors.white)),
-          )
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8B1D1D),
+              minimumSize: const Size(double.infinity, 45),
+            ),
+            child: const Text(
+              "Ver resultados",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  // --- Widgets Auxiliares ---
+
+  Widget _datePickerField(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required Function(String) onDateSelected,
+    required VoidCallback onClear,
+  }) {
+    return InkWell(
+      onTap: () async {
+        DateTime initial = DateTime.now();
+        if (value.isNotEmpty) {
+          try {
+            initial = DateTime.parse(value);
+          } catch (_) {}
+        }
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: initial,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) {
+          onDateSelected(picked.toIso8601String().substring(0, 10));
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: const Icon(Icons.calendar_today, size: 20),
+          suffixIcon: value.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: onClear,
+                )
+              : null,
+          filled: true,
+          fillColor: const Color(0xFFF1F5F9),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 8,
+          ),
+        ),
+        child: Text(
+          value.isEmpty ? 'Seleccionar' : value,
+          style: TextStyle(
+            fontSize: 13,
+            color: value.isEmpty ? Colors.grey : Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _field(String label, IconData icon, String val, Function(String) fn) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextField(
+        controller: TextEditingController(text: val)
+          ..selection = TextSelection.collapsed(offset: val.length),
+        onChanged: fn,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, size: 20),
+          filled: true,
+          fillColor: const Color(0xFFF1F5F9),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+        ),
       ),
     );
   }
@@ -324,15 +619,11 @@ class _FiltersSheet extends StatelessWidget {
       child: DropdownButtonFormField<String>(
         value: value,
         isExpanded: true,
-        hint: Text("Seleccionar $label"), 
         items: options
             .map(
-              (option) => DropdownMenuItem(
-                value: option.isEmpty ? null : option,
-                child: Text(
-                  option.isEmpty ? "Todos los niveles" : option, 
-                  style: const TextStyle(fontSize: 14),
-                ),
+              (opt) => DropdownMenuItem(
+                value: opt.isEmpty ? null : opt,
+                child: Text(opt.isEmpty ? "Todos" : opt),
               ),
             )
             .toList(),
@@ -341,51 +632,13 @@ class _FiltersSheet extends StatelessWidget {
           labelText: label,
           prefixIcon: Icon(icon, size: 22),
           filled: true,
-          fillColor: const Color(0xFFF1F5F9), 
+          fillColor: const Color(0xFFF1F5F9),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         ),
       ),
-    );
-  }
-
-  Widget _field(String label, IconData icon, String val, Function(String) fn) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: TextEditingController(text: val)..selection = TextSelection.collapsed(offset: val.length),
-        onChanged: fn,
-        decoration: InputDecoration(
-          labelText: label, prefixIcon: Icon(icon, size: 20),
-          filled: true, fillColor: const Color(0xFFF1F5F9),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-        ),
-      ),
-    );
-  }
-}
-
-class _DeleteActionBtn extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final count = context.watch<PlaneacionCubit>().state.selectedPlaneacionIds.length;
-    return count > 0 ? IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => context.read<PlaneacionCubit>().eliminarSeleccionados()) : const SizedBox();
-  }
-}
-
-class _AddButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      backgroundColor: const Color(0xFF8B1D1D),
-      onPressed: () async {
-        final res = await Navigator.push(context, MaterialPageRoute(builder: (_) => const PlaneacionCrearEditarView()));
-        if (res == true) context.read<PlaneacionCubit>().cargarPlaneaciones();
-      },
-      child: const Icon(Icons.add, color: Colors.white),
     );
   }
 }

@@ -27,8 +27,8 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
   late TextEditingController _actividadCtrl;
   late TextEditingController _observacionesCtrl;
   late TextEditingController _gradoYGCtrl;
+  late TextEditingController _horaCtrl; // Controlador para manejar la hora editable
   late String _categoria;
-  late String _hora;
 
   @override
   void initState() {
@@ -39,11 +39,63 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
     _observacionesCtrl = TextEditingController(text: r?.observaciones ?? "");
     _gradoYGCtrl = TextEditingController(text: r?.grado_y_grupo ?? "");
     _categoria = r?.categoria ?? "Clases";
-    _hora = r?.hora ?? _formatearHora(TimeOfDay.now());
+    
+    // Si viene nulo se queda vacío sin autocompletar la hora actual
+    _horaCtrl = TextEditingController(text: r?.hora ?? "");
+  }
+
+  @override
+  void dispose() {
+    _tituloCtrl.dispose();
+    _actividadCtrl.dispose();
+    _observacionesCtrl.dispose();
+    _gradoYGCtrl.dispose();
+    _horaCtrl.dispose();
+    super.dispose();
   }
 
   String _formatearHora(TimeOfDay time) =>
       "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+
+  // Método para abrir el selector de hora nativo
+  Future<void> _seleccionarHora(BuildContext context) async {
+    TimeOfDay horaInicial = TimeOfDay.now();
+    try {
+      final partes = _horaCtrl.text.split(':');
+      if (partes.length == 2) {
+        horaInicial = TimeOfDay(hour: int.parse(partes[0]), minute: int.parse(partes[1]));
+      }
+    } catch (_) {}
+
+    final TimeOfDay? horaSeleccionada = await showTimePicker(
+      context: context,
+      initialTime: horaInicial,
+      initialEntryMode: TimePickerEntryMode.input,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: zacTinto, // Color de cabecera
+              onPrimary: Colors.white,
+              onSurface: Colors.black, // Color del texto
+            ),
+          ),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: true,
+            ),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (horaSeleccionada != null) {
+      setState(() {
+        _horaCtrl.text = _formatearHora(horaSeleccionada);
+      });
+    }
+  }
 
   void _guardar(BuildContext context) {
     if (_formKey.currentState!.validate()) {
@@ -51,10 +103,11 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
         id: widget.registroExistente?.id,
         titulo: _tituloCtrl.text,
         actividad: _actividadCtrl.text,
-        observaciones: _observacionesCtrl.text,
+        observaciones: _observacionesCtrl.text.isNotEmpty ? _observacionesCtrl.text : "",
         categoria: _categoria,
         grado_y_grupo: _gradoYGCtrl.text.isNotEmpty ? _gradoYGCtrl.text : null,
-        hora: _hora,
+        
+        hora: _horaCtrl.text.isNotEmpty ? _horaCtrl.text : "", 
         fecha:
             widget.registroExistente?.fecha ??
             "${widget.fechaSeleccionada.year}-${widget.fechaSeleccionada.month.toString().padLeft(2, '0')}-${widget.fechaSeleccionada.day.toString().padLeft(2, '0')}",
@@ -118,6 +171,7 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
                         ),
                         _gradoYGrupoField(),
                         _buildDropdown(),
+                        _horaField(context), 
                         const SizedBox(height: 12),
                         _customField(
                           _actividadCtrl,
@@ -128,7 +182,7 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
                         ),
                         _customField(
                           _observacionesCtrl,
-                          "Observaciones",
+                          "Observaciones (opcional)",
                           Icons.comment,
                           "Notas adicionales...",
                           maxLines: 2,
@@ -136,7 +190,7 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
                       ]),
                       const SizedBox(
                         height: 100,
-                      ), // Espacio para el botón flotante
+                      ),
                     ],
                   ),
                 ),
@@ -196,9 +250,11 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
       child: TextFormField(
         controller: ctrl,
         maxLines: maxLines,
-        validator: (v) => (v == null || v.isEmpty) && label != "Observaciones"
-            ? "Campo requerido"
-            : null,
+        validator: (v) {
+          if (label.startsWith("Observaciones")) return null;
+          if (v == null || v.isEmpty) return "Campo requerido";
+          return null;
+        },
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
@@ -226,6 +282,7 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
           "Clases",
           "Incidencias",
           "Evaluaciones",
+          "Reuniones",
           "Otros",
         ].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
         onChanged: (val) => setState(() => _categoria = val!),
@@ -246,6 +303,44 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
             horizontal: 15,
             vertical: 5,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _horaField(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: _horaCtrl,
+        readOnly: true,
+        onTap: () => _seleccionarHora(context),
+        validator: (v) => null, 
+        decoration: InputDecoration(
+          labelText: "Hora del registro (opcional)", 
+          prefixIcon: Icon(
+            Icons.access_time,
+            size: 20,
+            color: zacTinto.withOpacity(0.6),
+          ),
+          suffixIcon: _horaCtrl.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () {
+                    // El setState garantiza que el botón "X" desaparezca inmediatamente al borrar
+                    setState(() {
+                      _horaCtrl.clear();
+                    });
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: const Color(0xFFF8FAFC),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.all(15),
         ),
       ),
     );
@@ -304,15 +399,15 @@ class _PaginaRegistroBitacoraState extends State<BitacoraCrearEditarView> {
           prefixIcon: Icon(
             Icons.school,
             size: 20,
-            color: Color(0xFF8B1D1D).withOpacity(0.6),
+            color: const Color(0xFF8B1D1D).withOpacity(0.6),
           ),
           filled: true,
-          fillColor: Color(0xFFF8FAFC),
+          fillColor: const Color(0xFFF8FAFC),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide.none,
           ),
-          contentPadding: EdgeInsets.all(15),
+          contentPadding: const EdgeInsets.all(15),
         ),
       ),
     );

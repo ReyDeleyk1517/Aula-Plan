@@ -15,12 +15,18 @@ class EventoView extends StatelessWidget {
   // colores en los puntitos del calendario
   Color _getEventoColor(String tipo) {
     switch (tipo) {
-      case "Académico": return const Color(0xFF3B82F6);
-      case "Cívico":    return const Color(0xFF10B981);
-      case "Social":    return const Color(0xFF8B5CF6);
-      case "Urgente":   return const Color(0xFFEF4444);
-      case "Otros":     return const Color(0xFF64748B);
-      default:          return const Color(0xFF64748B);
+      case "Académico":
+        return const Color(0xFF3B82F6);
+      case "Cívico":
+        return const Color(0xFF10B981);
+      case "Social":
+        return const Color(0xFF8B5CF6);
+      case "Urgente":
+        return const Color(0xFFEF4444);
+      case "Otros":
+        return const Color(0xFF64748B);
+      default:
+        return const Color(0xFF64748B);
     }
   }
 
@@ -33,7 +39,10 @@ class EventoView extends StatelessWidget {
       child: Scaffold(
         backgroundColor: const Color(0xFFF1F5F9),
         appBar: AppBar(
-          title: const Text('Calendario escolar', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Calendario escolar',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           elevation: 0,
           centerTitle: true,
         ),
@@ -66,10 +75,11 @@ class EventoView extends StatelessWidget {
             firstDay: DateTime(2024),
             lastDay: DateTime(2027),
             focusedDay: estado.fechaSeleccionada,
-            selectedDayPredicate: (day) => isSameDay(estado.fechaSeleccionada, day),
+            selectedDayPredicate: (day) =>
+                isSameDay(estado.fechaSeleccionada, day),
             calendarFormat: CalendarFormat.month,
             startingDayOfWeek: StartingDayOfWeek.monday,
-            
+
             // Lógica para detectar eventos en un rango de fechas
             eventLoader: (day) {
               final d = DateTime(day.year, day.month, day.day);
@@ -77,12 +87,17 @@ class EventoView extends StatelessWidget {
                 try {
                   final inicio = DateTime.parse(e.fecha_inicio);
                   final fin = DateTime.parse(e.fecha_fin);
-                  final inicioDate = DateTime(inicio.year, inicio.month, inicio.day);
+                  final inicioDate = DateTime(
+                    inicio.year,
+                    inicio.month,
+                    inicio.day,
+                  );
                   final finDate = DateTime(fin.year, fin.month, fin.day);
-                  
+
                   // Retorna verdadero si el día está dentro del rango inclusivo
-                  return (d.isAtSameMomentAs(inicioDate) || d.isAfter(inicioDate)) &&
-                         (d.isAtSameMomentAs(finDate) || d.isBefore(finDate));
+                  return (d.isAtSameMomentAs(inicioDate) ||
+                          d.isAfter(inicioDate)) &&
+                      (d.isAtSameMomentAs(finDate) || d.isBefore(finDate));
                 } catch (_) {
                   return false;
                 }
@@ -96,12 +111,22 @@ class EventoView extends StatelessWidget {
             headerStyle: HeaderStyle(
               formatButtonVisible: false,
               titleCentered: true,
-              titleTextStyle: TextStyle(color: zacTinto, fontWeight: FontWeight.bold, fontSize: 17),
+              titleTextStyle: TextStyle(
+                color: zacTinto,
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+              ),
             ),
 
             calendarStyle: CalendarStyle(
-              todayDecoration: BoxDecoration(color: zacTinto.withOpacity(0.3), shape: BoxShape.circle),
-              selectedDecoration: BoxDecoration(color: zacTinto, shape: BoxShape.circle),
+              todayDecoration: BoxDecoration(
+                color: zacTinto.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: zacTinto,
+                shape: BoxShape.circle,
+              ),
               outsideDaysVisible: false,
             ),
 
@@ -112,18 +137,25 @@ class EventoView extends StatelessWidget {
                 final oficiales = estado.eventosOficiales.where((e) {
                   final inicio = e['inicio'] as DateTime;
                   final fin = e['fin'] as DateTime;
-                  return (d.isAtSameMomentAs(inicio) || d.isAfter(inicio)) && d.isBefore(fin);
+                  return (d.isAtSameMomentAs(inicio) || d.isAfter(inicio)) &&
+                      d.isBefore(fin);
                 }).toList();
 
-                if (!isSameDay(day, estado.fechaSeleccionada) && oficiales.isNotEmpty) {
+                if (!isSameDay(day, estado.fechaSeleccionada) &&
+                    oficiales.isNotEmpty) {
                   return Container(
                     margin: const EdgeInsets.all(6.0),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: (oficiales.first['color'] as Color).withOpacity(0.2),
+                      color: (oficiales.first['color'] as Color).withOpacity(
+                        0.2,
+                      ),
                       shape: BoxShape.circle,
                     ),
-                    child: Text('${day.day}', style: const TextStyle(color: Colors.black87)),
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(color: Colors.black87),
+                    ),
                   );
                 }
                 return null;
@@ -137,14 +169,14 @@ class EventoView extends StatelessWidget {
                   bottom: 6,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: events.take(4).map((event) { 
+                    children: events.take(4).map((event) {
                       final e = event as EventoEntidad;
                       return Container(
                         width: 5,
                         height: 5,
                         margin: const EdgeInsets.symmetric(horizontal: 0.5),
                         decoration: BoxDecoration(
-                          color: _getEventoColor(e.tipo_evento), 
+                          color: _getEventoColor(e.tipo_evento),
                           shape: BoxShape.circle,
                         ),
                       );
@@ -162,7 +194,14 @@ class EventoView extends StatelessWidget {
   Widget _filtros() {
     return BlocBuilder<EventoCubit, EventoState>(
       builder: (context, estado) {
-        final listaFiltros = ["Todos", "Académico", "Cívico", "Social", "Urgente", "Otros"];
+        final listaFiltros = [
+          "Todos",
+          "Académico",
+          "Cívico",
+          "Social",
+          "Urgente",
+          "Otros",
+        ];
         return Container(
           height: 38,
           margin: const EdgeInsets.symmetric(vertical: 12),
@@ -172,14 +211,17 @@ class EventoView extends StatelessWidget {
             itemCount: listaFiltros.length,
             itemBuilder: (context, index) {
               final String filtroNombre = listaFiltros[index];
-              final bool esActivo = (estado.filtroCategoria == null && filtroNombre == "Todos") || 
-                                   (estado.filtroCategoria == filtroNombre);
+              final bool esActivo =
+                  (estado.filtroCategoria == null && filtroNombre == "Todos") ||
+                  (estado.filtroCategoria == filtroNombre);
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
                   label: Text(filtroNombre),
                   selected: esActivo,
-                  onSelected: (_) => context.read<EventoCubit>().seleccionarFiltro(filtroNombre),
+                  onSelected: (_) => context
+                      .read<EventoCubit>()
+                      .seleccionarFiltro(filtroNombre),
                   selectedColor: zacTinto,
                   labelStyle: TextStyle(
                     color: esActivo ? Colors.white : zacTinto,
@@ -187,7 +229,9 @@ class EventoView extends StatelessWidget {
                     fontWeight: esActivo ? FontWeight.bold : FontWeight.normal,
                   ),
                   backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   side: BorderSide(color: zacTinto.withOpacity(0.3)),
                   showCheckmark: false,
                 ),
@@ -202,13 +246,19 @@ class EventoView extends StatelessWidget {
   Widget _listaEventos() {
     return BlocBuilder<EventoCubit, EventoState>(
       builder: (context, estado) {
-        if (estado.cargando) return const Center(child: CircularProgressIndicator());
+        if (estado.cargando)
+          return const Center(child: CircularProgressIndicator());
 
         final oficialesHoy = estado.eventosOficiales.where((e) {
           final inicio = e['inicio'] as DateTime;
           final fin = e['fin'] as DateTime;
-          final dia = DateTime(estado.fechaSeleccionada.year, estado.fechaSeleccionada.month, estado.fechaSeleccionada.day);
-          return (dia.isAtSameMomentAs(inicio) || dia.isAfter(inicio)) && dia.isBefore(fin);
+          final dia = DateTime(
+            estado.fechaSeleccionada.year,
+            estado.fechaSeleccionada.month,
+            estado.fechaSeleccionada.day,
+          );
+          return (dia.isAtSameMomentAs(inicio) || dia.isAfter(inicio)) &&
+              dia.isBefore(fin);
         }).toList();
 
         if (estado.eventos.isEmpty && oficialesHoy.isEmpty) {
@@ -216,9 +266,16 @@ class EventoView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.event_note_outlined, size: 64, color: Colors.grey.shade300),
+                Icon(
+                  Icons.event_note_outlined,
+                  size: 64,
+                  color: Colors.grey.shade300,
+                ),
                 const SizedBox(height: 12),
-                const Text("No hay actividades programadas", style: TextStyle(color: Colors.grey)),
+                const Text(
+                  "No hay actividades programadas",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
           );
@@ -235,16 +292,23 @@ class EventoView extends StatelessWidget {
             if (estado.eventos.isNotEmpty) ...[
               _buildSectionHeader("MIS EVENTOS"),
               ...estado.eventos.map((evento) {
-                final bool isSelected = estado.eventosSeleccionados.contains(evento.id);
+                final bool isSelected = estado.eventosSeleccionados.contains(
+                  evento.id,
+                );
                 return EventoCard(
                   evento: evento,
                   estaSeleccionado: isSelected,
-                  onToggleSeleccion: () => context.read<EventoCubit>().toggleSeleccion(evento.id!),
+                  onToggleSeleccion: () =>
+                      context.read<EventoCubit>().toggleSeleccion(evento.id!),
                   onTap: () {
                     if (estado.eventosSeleccionados.isNotEmpty) {
                       context.read<EventoCubit>().toggleSeleccion(evento.id!);
                     } else {
-                      _irARegistro(context, registro: evento, fecha: estado.fechaSeleccionada);
+                      _irARegistro(
+                        context,
+                        registro: evento,
+                        fecha: estado.fechaSeleccionada,
+                      );
                     }
                   },
                 );
@@ -261,7 +325,12 @@ class EventoView extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blueGrey, letterSpacing: 1.2),
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Colors.blueGrey,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -278,9 +347,27 @@ class EventoView extends StatelessWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: CircleAvatar(backgroundColor: color, radius: 18, child: const Icon(Icons.account_balance, color: Colors.white, size: 18)),
-        title: Text(e['titulo'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B))),
-        subtitle: const Text("Secretaría de Educación", style: TextStyle(fontSize: 12)),
+        leading: CircleAvatar(
+          backgroundColor: color,
+          radius: 18,
+          child: const Icon(
+            Icons.account_balance,
+            color: Colors.white,
+            size: 18,
+          ),
+        ),
+        title: Text(
+          e['titulo'],
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Color(0xFF1E293B),
+          ),
+        ),
+        subtitle: const Text(
+          "Secretaría de Educación",
+          style: TextStyle(fontSize: 12),
+        ),
       ),
     );
   }
@@ -289,27 +376,56 @@ class EventoView extends StatelessWidget {
     return BlocBuilder<EventoCubit, EventoState>(
       builder: (context, estado) {
         if (estado.eventosSeleccionados.isNotEmpty) {
-          return FloatingActionButton.extended(
-            onPressed: () => _confirmarEliminacion(context),
-            label: Text("Eliminar (${estado.eventosSeleccionados.length})"),
-            icon: const Icon(Icons.delete_outline),
-            backgroundColor: Colors.red,
+          // Usamos Column para que se vean TODOS los botones dentro del if
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Botón de Eliminar
+              FloatingActionButton.extended(
+                heroTag: 'delete_eventos', // Agregamos heroTag por seguridad
+                onPressed: () => _confirmarEliminacion(context),
+                label: Text("Eliminar (${estado.eventosSeleccionados.length})"),
+                icon: const Icon(Icons.delete_outline),
+                backgroundColor: Colors.red,
+              ),
+              const SizedBox(height: 12), // Espacio entre botones
+              // Botón de Cancelar Selección
+              FloatingActionButton(
+                heroTag: 'cancel_eventos', // HeroTag único
+                mini: true,
+                onPressed: () => context.read<EventoCubit>().limpiarSeleccion(),
+                backgroundColor: Colors.grey[400],
+                child: const Icon(Icons.close, color: Colors.white),
+              ),
+            ],
           );
         }
+
+       
         return FloatingActionButton(
+          heroTag: 'add_evento',
           backgroundColor: zacTinto,
-          onPressed: () => _irARegistro(context, fecha: estado.fechaSeleccionada),
+          onPressed: () =>
+              _irARegistro(context, fecha: estado.fechaSeleccionada),
           child: const Icon(Icons.add, color: Colors.white),
         );
       },
     );
   }
 
-  Future<void> _irARegistro(BuildContext context, {EventoEntidad? registro, required DateTime fecha}) async {
+  Future<void> _irARegistro(
+    BuildContext context, {
+    EventoEntidad? registro,
+    required DateTime fecha,
+  }) async {
     final resultado = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EventoCrearEditarView(registroExistente: registro, fechaSeleccionada: fecha),
+        builder: (_) => EventoCrearEditarView(
+          registroExistente: registro,
+          fechaSeleccionada: fecha,
+        ),
       ),
     );
     if (resultado == true && context.mounted) {
@@ -324,7 +440,10 @@ class EventoView extends StatelessWidget {
         title: const Text("¿Eliminar eventos?"),
         content: const Text("Esta acción no se puede deshacer."),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(innerContext), child: const Text("Cancelar")),
+          TextButton(
+            onPressed: () => Navigator.pop(innerContext),
+            child: const Text("Cancelar"),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {

@@ -56,7 +56,7 @@ class RecursosDocenteState {
       
       bool coincideTipo = true;
       if (filtroTipo != 'Todos') {
-        final ext = r.tipoArchivo?.toLowerCase() ?? '';
+        final ext = r.tipoArchivo.toLowerCase() ?? '';
         switch (filtroTipo) {
           case 'Documentos':
             coincideTipo = ['pdf', 'doc', 'docx', 'txt', 'odt'].contains(ext);
@@ -111,6 +111,10 @@ class RecursosDocenteCubit extends Cubit<RecursosDocenteState> {
   Future<void> eliminarRecurso(int id) async {
     await eliminarRegistro(id);
     await cargarRecursos();
+  }
+  
+  void limpiarSeleccion() {
+    emit(state.copyWith(seleccionadosIds: const []));
   }
 
   void cambiarFiltroArea(String area) => emit(state.copyWith(filtroArea: area));

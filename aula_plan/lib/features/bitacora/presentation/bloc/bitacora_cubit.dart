@@ -10,7 +10,7 @@ class BitacoraState {
   final String? error;
 
   final String? filtroCategoria;
-  final List<int> registrosSeleccionados; 
+  final List<int> registrosSeleccionados;
 
   BitacoraState({
     this.cargando = false,
@@ -36,7 +36,8 @@ class BitacoraState {
       fechaSeleccionada: fechaSeleccionada ?? this.fechaSeleccionada,
       error: error ?? this.error,
       filtroCategoria: filtroCategoria ?? this.filtroCategoria,
-      registrosSeleccionados: registrosSeleccionados ?? this.registrosSeleccionados,
+      registrosSeleccionados:
+          registrosSeleccionados ?? this.registrosSeleccionados,
     );
   }
 }
@@ -47,31 +48,40 @@ class BitacoraCubit extends Cubit<BitacoraState> {
   final ObtenerRegistrosBitacora obtenerRegistros;
   final EliminarRegistroBitacora eliminarRegistro;
 
-
   BitacoraCubit({
     required this.obtenerRegistros,
 
     required this.eliminarRegistro,
-
   }) : super(BitacoraState(fechaSeleccionada: DateTime.now(), cargando: true));
 
   Future<void> cargarRegistros(DateTime fecha) async {
-    emit(state.copyWith(cargando: true, fechaSeleccionada: fecha, error: null));
-    
+    emit(
+      state.copyWith(
+        cargando: true,
+        fechaSeleccionada: fecha,
+        error: null,
+        registrosSeleccionados: const [],
+      ),
+    );
+
     try {
       //obtener todos los registros
       final todos = await obtenerRegistros();
-      
+
       final fechaFormateada = _formatearFecha(fecha);
       var filtrados = todos.where((r) => r.fecha == fechaFormateada).toList();
       final String? filtroActual = state.filtroCategoria;
       if (filtroActual != null && filtroActual != "Todos") {
-        filtrados = filtrados.where((r) => r.categoria == filtroActual).toList();
+        filtrados = filtrados
+            .where((r) => r.categoria == filtroActual)
+            .toList();
       }
-      
+
       emit(state.copyWith(cargando: false, registros: filtrados));
     } catch (e) {
-      emit(state.copyWith(cargando: false, error: "Error al cargar la bitácora"));
+      emit(
+        state.copyWith(cargando: false, error: "Error al cargar la bitácora"),
+      );
     }
   }
 
@@ -86,9 +96,8 @@ class BitacoraCubit extends Cubit<BitacoraState> {
 
   void cambiarFecha(DateTime nuevaFecha) => cargarRegistros(nuevaFecha);
 
-  String _formatearFecha(DateTime fecha) => 
+  String _formatearFecha(DateTime fecha) =>
       "${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}";
-
 
   void seleccionarFiltro(String? categoria) {
     // Actualizar estado
@@ -97,7 +106,7 @@ class BitacoraCubit extends Cubit<BitacoraState> {
     cargarRegistros(state.fechaSeleccionada);
   }
 
-  // Lógica de Selección 
+  // Lógica de Selección
 
   void toggleSeleccion(int id) {
     final actuales = List<int>.from(state.registrosSeleccionados);
@@ -113,7 +122,7 @@ class BitacoraCubit extends Cubit<BitacoraState> {
     emit(state.copyWith(registrosSeleccionados: []));
   }
 
-  // Lógica de Borrado Múltiple 
+  // Lógica de Borrado Múltiple
 
   Future<void> borrarSeleccionados() async {
     emit(state.copyWith(cargando: true));
@@ -122,12 +131,17 @@ class BitacoraCubit extends Cubit<BitacoraState> {
       for (var id in state.registrosSeleccionados) {
         await eliminarRegistro(id);
       }
-      
+
       // Limpiamos la lista de selección y recargamos
       emit(state.copyWith(registrosSeleccionados: []));
       await cargarRegistros(state.fechaSeleccionada);
     } catch (e) {
-      emit(state.copyWith(cargando: false, error: "Error al eliminar registros múltiples"));
+      emit(
+        state.copyWith(
+          cargando: false,
+          error: "Error al eliminar registros múltiples",
+        ),
+      );
     }
   }
 }

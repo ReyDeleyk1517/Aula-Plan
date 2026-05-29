@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'contenido_service.dart';
 import 'contenido_model.dart';
 
 class ItemContenidoCard extends StatelessWidget {

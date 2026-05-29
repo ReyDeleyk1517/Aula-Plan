@@ -4,7 +4,7 @@ import 'contenido_service.dart';
 import 'item_contenido_card.dart';
 
 class BuscadorContenidosDialog extends StatefulWidget {
-  final List<String> fasesHabilitadas; // Recibimos las fases
+  final List<String> fasesHabilitadas; 
   const BuscadorContenidosDialog({super.key, required this.fasesHabilitadas});
 
   @override
@@ -17,10 +17,10 @@ class _BuscadorContenidosDialogState extends State<BuscadorContenidosDialog> {
   String? _gradoSeleccionado;
   Map<String, List<ContenidoBusqueda>>? _datosCargados;
 
-  // NUEVA ESTRUCTURA: Mapa de Campos -> (Mapa de Títulos -> Lista de PDAs)
-  // Esto permite recordar qué elegiste en cada campo formativo por separado
-  final Map<String, Map<String, List<String>>> _seleccionadosAgrupados = {};
+  // NUEVA VARIABLE: Controla si el panel de filtros está expandido u oculto
+  bool _mostrarFiltros = true;
 
+  final Map<String, Map<String, List<String>>> _seleccionadosAgrupados = {};
   final List<String> _campos = ['LEN', 'SyPC', 'ENyS', 'DHyC'];
   final Color zacTinto = const Color(0xFF8B1D1D);
 
@@ -36,7 +36,7 @@ class _BuscadorContenidosDialogState extends State<BuscadorContenidosDialog> {
       _faseSeleccionada = fase;
       _campoSeleccionado = null;
       _gradoSeleccionado = null;
-      _seleccionadosAgrupados.clear(); // Limpiamos al cambiar de fase por integridad
+      _seleccionadosAgrupados.clear(); 
       _datosCargados = null;
     });
 
@@ -55,7 +55,6 @@ class _BuscadorContenidosDialogState extends State<BuscadorContenidosDialog> {
           if (_seleccionadosAgrupados.isNotEmpty)
             TextButton(
               onPressed: () {
-                // Devolvemos el mapa completo agrupado por campos
                 Navigator.pop(context, _seleccionadosAgrupados);
               },
               child: const Text('GUARDAR', 
@@ -65,9 +64,25 @@ class _BuscadorContenidosDialogState extends State<BuscadorContenidosDialog> {
       ),
       body: Column(
         children: [
-          _buildSeccionFase(),
-          if (_faseSeleccionada != null) _buildSeccionCampos(),
-          if (_campoSeleccionado != null) _buildSeccionGrados(),
+          // 1. Barra superior para ocultar/mostrar los filtros de forma intuitiva
+          _buildBarraControlFiltros(),
+          
+          // 2. Contenedor animado que esconde o muestra el bloque completo de opciones
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 250),
+            firstChild: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSeccionFase(),
+                if (_faseSeleccionada != null) _buildSeccionCampos(),
+                if (_campoSeleccionado != null) _buildSeccionGrados(),
+                const SizedBox(height: 4),
+              ],
+            ),
+            secondChild: const SizedBox.shrink(),
+            crossFadeState: _mostrarFiltros ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          ),
+          
           const Divider(height: 1),
           Expanded(child: _buildCuerpoLista()),
         ],
@@ -75,15 +90,49 @@ class _BuscadorContenidosDialogState extends State<BuscadorContenidosDialog> {
     );
   }
 
-Widget _buildSeccionFase() {
-    // Definimos qué fases de la vista de edición activan qué botones aquí
+  // Genera un botón plano ancho que actúa como pestaña colapsable
+  Widget _buildBarraControlFiltros() {
+    return InkWell(
+      onTap: () => setState(() => _mostrarFiltros = !_mostrarFiltros),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        color: Colors.grey.shade100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.filter_alt_outlined, size: 18, color: zacTinto),
+                const SizedBox(width: 8),
+                Text(
+                  _mostrarFiltros ? "OCULTAR PANEL DE FILTROS" : "MOSTRAR PANEL DE FILTROS",
+                  style: TextStyle(
+                    fontSize: 12, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.grey.shade700,
+                    letterSpacing: 0.5
+                  ),
+                ),
+              ],
+            ),
+            // Flecha dinámica que apunta arriba si está abierto o abajo si está cerrado
+            Icon(
+              _mostrarFiltros ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+              color: Colors.grey.shade600,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeccionFase() {
     final todasLasOpciones = ['2', '3, 4 y 5', '6'];
     
     final opcionesVisibles = todasLasOpciones.where((faseBoton) {
       if (faseBoton == '2') return widget.fasesHabilitadas.contains('Fase 2');
       if (faseBoton == '6') return widget.fasesHabilitadas.contains('Fase 6');
       if (faseBoton == '3, 4 y 5') {
-        // Si la lista tiene 3, 4 O 5, mostramos este botón
         return widget.fasesHabilitadas.any((f) => ['Fase 3', 'Fase 4', 'Fase 5'].contains(f));
       }
       return false;
@@ -92,8 +141,12 @@ Widget _buildSeccionFase() {
     if (opcionesVisibles.isEmpty) {
       return _filtroCard(
         titulo: "1. Selecciona la fase", 
-        child: const Text("No hay fases seleccionadas en la planeación", 
-          style: TextStyle(fontSize: 12, color: Colors.red))
+        child: Wrap(
+          spacing: 8.0, 
+          runSpacing: 4.0, 
+          alignment: WrapAlignment.start,
+          children: opcionesVisibles.map((f) => _faseChip(f)).toList(),
+        ),
       );
     }
 
@@ -109,14 +162,10 @@ Widget _buildSeccionFase() {
   Widget _buildSeccionCampos() {
     return _filtroCard(
       titulo: "2. Campo formativo",
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: _campos.map((c) => Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: _campoChip(c),
-          )).toList(),
-        ),
+      child: Wrap(
+        spacing: 4.0,
+        runSpacing: 4.0,
+        children: _campos.map((c) => _campoChip(c)).toList(),
       ),
     );
   }
@@ -136,11 +185,10 @@ Widget _buildSeccionFase() {
 
     return _filtroCard(
       titulo: "3. Selecciona el grado",
-      child: Row(
-        children: gradosDisponibles.map((g) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: _gradoChip(g),
-        )).toList(),
+      child: Wrap(
+        spacing: 8.0, 
+        runSpacing: 8.0, 
+        children: gradosDisponibles.map((g) => _gradoChip(g)).toList(),
       ),
     );
   }
@@ -173,7 +221,6 @@ Widget _buildSeccionFase() {
       itemCount: lista.length,
       itemBuilder: (context, index) {
         final item = lista[index];
-        // Obtenemos los PDAs seleccionados para este contenido específico dentro del campo actual
         final seleccionadosDelItem = _seleccionadosAgrupados[_campoSeleccionado!]?[item.titulo] ?? [];
 
         return ItemContenidoCard(
@@ -183,15 +230,12 @@ Widget _buildSeccionFase() {
           onToggle: (pda, esSeleccionado) {
             setState(() {
               final campo = _campoSeleccionado!;
-              
-              // Inicializamos el mapa del campo si no existe
               _seleccionadosAgrupados.putIfAbsent(campo, () => {});
               
               if (esSeleccionado) {
                 _seleccionadosAgrupados[campo]!.putIfAbsent(item.titulo, () => []).add(pda);
               } else {
                 _seleccionadosAgrupados[campo]![item.titulo]?.remove(pda);
-                // Limpieza de llaves vacías
                 if (_seleccionadosAgrupados[campo]![item.titulo]!.isEmpty) {
                   _seleccionadosAgrupados[campo]!.remove(item.titulo);
                 }
@@ -221,7 +265,7 @@ Widget _buildSeccionFase() {
   Widget _filtroCard({required String titulo, required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,

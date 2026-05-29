@@ -16,10 +16,24 @@ class PlaneacionServicioPdf {
 
     //logo
     final ByteData bytes = await rootBundle.load(
-      'assets/images/logo_secretaria.jpg',
+      //'assets/images/logo_secretaria.jpg',
+      'assets/images/logo_edu_esp_z18f.png',
     );
     final Uint8List logoBytes = bytes.buffer.asUint8List();
     final pw.MemoryImage logoImagen = pw.MemoryImage(logoBytes);
+
+    final List<String> assetsCampos = [
+      'assets/images/logo_lenguajes.png',
+      'assets/images/logo_saberes_y_pensamiento_cientifico.png',
+      'assets/images/logo_de_lo_humano.png',
+      'assets/images/logo_etica_naturaleza_y_sociedad.png',
+    ];
+
+    List<pw.MemoryImage> logosCampos = [];
+    for (String path in assetsCampos) {
+      final data = await rootBundle.load(path);
+      logosCampos.add(pw.MemoryImage(data.buffer.asUint8List()));
+    }
 
     final obtenerPerfil = sl<ObtenerRegistrosPerfil>();
     final listaPerfiles = await obtenerPerfil();
@@ -27,6 +41,7 @@ class PlaneacionServicioPdf {
     final nombreDocente = perfil != null
         ? "${perfil.nombre} ${perfil.apellidos}".toUpperCase()
         : "NOMBRE DEL DOCENTE";
+    final zonaEscolar = perfil?.zona_escolar;
 
     final estiloTitulo = pw.TextStyle(
       fontSize: 10,
@@ -38,13 +53,17 @@ class PlaneacionServicioPdf {
       fontWeight: pw.FontWeight.bold,
     );
 
-    final condicionesGuardadas = planeacion.condicionAlumnado.split(',').map((e) => e.trim());
+    final condicionesGuardadas = planeacion.condicionAlumnado
+        .split(',')
+        .map((e) => e.trim())
+        .toSet(); // Usar Set para habilitar busqueda dcon .contains
 
-    bool tieneAS = condicionesGuardadas.contains("AS");
-    bool tieneD = condicionesGuardadas.contains("D");
-    bool tieneTEA = condicionesGuardadas.contains("TEA");
-    bool tieneTDAH = condicionesGuardadas.contains("TDAH");
-    bool tieneTE = condicionesGuardadas.contains("TE");
+    final nivelesSeleccionados = planeacion.nivelEducativo
+        .split(',')
+        .map(
+          (e) => e.trim().toUpperCase(),
+        ) // Forzamos mayúsculas para evitar errores
+        .toSet();
 
     pdf.addPage(
       pw.MultiPage(
@@ -57,8 +76,8 @@ class PlaneacionServicioPdf {
             top: 0,
             child: pw.Image(
               logoImagen,
-              width: 100,
-              height: 100,
+              width: 150,
+              height: 150,
             ), // Ajusta el tamaño
           ),
           // ENCABEZADO INSTITUCIONAL ---
@@ -77,7 +96,7 @@ class PlaneacionServicioPdf {
                   style: estiloTitulo.copyWith(fontSize: 10),
                 ),
                 pw.Text(
-                  "ZONA ESCOLAR 18 EDUCACIÓN ESPECIAL",
+                  "ZONA ESCOLAR ${zonaEscolar} EDUCACIÓN ESPECIAL",
                   style: estiloTitulo,
                 ),
                 pw.Text(
@@ -132,38 +151,35 @@ class PlaneacionServicioPdf {
                 verticalAlignment: pw.TableCellVerticalAlignment.middle,
                 children: [
                   _celdaTexto(planeacion.nombreEscuela, estiloCelda),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.symmetric(vertical: 2),
-                    child: pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _cuadritoConSigla(
-                          "INI",
-                          planeacion.nivelEducativo.contains("INI"),
-                          estiloSigla,
-                        ),
-                        _cuadritoConSigla(
-                          "PREE",
-                          planeacion.nivelEducativo.contains("PREE"),
-                          estiloSigla,
-                        ),
-                        _cuadritoConSigla(
-                          "PRIM",
-                          planeacion.nivelEducativo.contains("PRIM"),
-                          estiloSigla,
-                        ),
-                        _cuadritoConSigla(
-                          "SEC",
-                          planeacion.nivelEducativo.contains("SEC"),
-                          estiloSigla,
-                        ),
-                        _cuadritoConSigla(
-                          "BACH",
-                          planeacion.nivelEducativo.contains("BACH"),
-                          estiloSigla,
-                        ),
-                      ],
-                    ),
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _cuadritoConSigla(
+                        "INI",
+                        nivelesSeleccionados,
+                        estiloSigla,
+                      ),
+                      _cuadritoConSigla(
+                        "PREE",
+                        nivelesSeleccionados,
+                        estiloSigla,
+                      ),
+                      _cuadritoConSigla(
+                        "PRIM",
+                        nivelesSeleccionados,
+                        estiloSigla,
+                      ),
+                      _cuadritoConSigla(
+                        "SEC",
+                        nivelesSeleccionados,
+                        estiloSigla,
+                      ),
+                      _cuadritoConSigla(
+                        "BACH",
+                        nivelesSeleccionados,
+                        estiloSigla,
+                      ),
+                    ],
                   ),
                   _celdaTexto(planeacion.faseEducativa, estiloCelda),
                   _celdaTexto(planeacion.grupo, estiloCelda),
@@ -174,27 +190,32 @@ class PlaneacionServicioPdf {
                       children: [
                         _cuadritoConSigla(
                           "AS",
-                          tieneAS,
+                          condicionesGuardadas,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "D",
-                          tieneD,
+                          condicionesGuardadas,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TEA",
-                          tieneTEA,
+                          condicionesGuardadas,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TDAH",
-                          tieneTDAH,
+                          condicionesGuardadas,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TE",
-                          tieneTE,
+                          condicionesGuardadas,
+                          estiloSigla,
+                        ),
+                        _cuadritoConSigla(
+                          "Regular",
+                          condicionesGuardadas,
                           estiloSigla,
                         ),
                       ],
@@ -265,21 +286,24 @@ class PlaneacionServicioPdf {
               2: const pw.FlexColumnWidth(1),
               3: const pw.FlexColumnWidth(1),
             },
+            //Contenidos titulos
             children: [
-              // Fila 2: 4 cuadros con etiquetas y checkboxes (25% cada uno)
               pw.TableRow(
                 children: [
-                  _celdaCampoCheck("Lenguajes", estiloSigla),
-                  _celdaCampoCheck(
+                  _celdaCampo("Lenguajes", logosCampos[0], estiloSigla),
+                  _celdaCampo(
                     "Saberes y pensamiento científico",
+                    logosCampos[1],
                     estiloSigla,
                   ),
-                  _celdaCampoCheck(
+                  _celdaCampo(
                     "De lo humano y lo comunitario.",
+                    logosCampos[2],
                     estiloSigla,
                   ),
-                  _celdaCampoCheck(
+                  _celdaCampo(
                     "Ética, Naturaleza y sociedades",
+                    logosCampos[3],
                     estiloSigla,
                   ),
                 ],
@@ -511,7 +535,10 @@ class PlaneacionServicioPdf {
               pw.TableRow(
                 children: [
                   _celdaEtiquetaLateral("FASE/MOMENTO/ETAPA", estiloCelda),
-                  _celdaDatoLateral("", estiloCelda),
+                  _celdaDatoLateral(
+                    planeacion.faseMomentoEtapa ?? "",
+                    estiloCelda,
+                  ),
                 ],
               ),
             ],
@@ -681,9 +708,12 @@ class PlaneacionServicioPdf {
 
   static pw.Widget _cuadritoConSigla(
     String sigla,
-    bool marcado,
+    Set<String> condiciones, // Recibe el Set de condiciones
     pw.TextStyle estilo,
   ) {
+    // La lógica se resuelve aquí adentro
+    bool marcado = condiciones.contains(sigla);
+
     return pw.Column(
       mainAxisSize: pw.MainAxisSize.min,
       children: [
@@ -701,8 +731,6 @@ class PlaneacionServicioPdf {
       ],
     );
   }
-
-
 
   // Helper para las etiquetas laterales (25% ancho, gris)
   static pw.Widget _celdaEtiquetaLateral(String texto, pw.TextStyle estilo) {
@@ -728,7 +756,11 @@ class PlaneacionServicioPdf {
   }
 
   // Helper para la fila de campos formativos (con checkbox)
-  static pw.Widget _celdaCampoCheck(String nombre, pw.TextStyle estilo) {
+  static pw.Widget _celdaCampo(
+    String nombre,
+    pw.MemoryImage logo,
+    pw.TextStyle estilo,
+  ) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(4),
       height: 45, // Altura fija para uniformidad
@@ -736,6 +768,7 @@ class PlaneacionServicioPdf {
         mainAxisAlignment: pw.MainAxisAlignment.start,
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
+          pw.Image(logo, width: 20, height: 20),
           pw.SizedBox(width: 4),
           pw.Expanded(
             child: pw.Text(nombre, style: estilo.copyWith(fontSize: 6)),
@@ -754,7 +787,6 @@ class PlaneacionServicioPdf {
       child: pw.Text(texto, style: estilo.copyWith(fontSize: 6.5)),
     );
   }
-
 
   // Genera el cuadrito y pone una "X" si el texto de la BD coincide con el nombre del eje
   static pw.Widget _cuadroCheckboxDinamico(

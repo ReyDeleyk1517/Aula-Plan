@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class DbHelper {
   // Singleton
@@ -30,7 +32,20 @@ class DbHelper {
   static const String eventoTable = 'evento';
 
   Future<Database> _initDatabase() async {
-    final ruta = join(await getDatabasesPath(), 'database_docente.db');
+    String directorioPath;
+
+    if (Platform.isWindows || Platform.isLinux) {
+      // En Windows, esto apunta a AppData\Roaming\ y SIEMPRE tiene permisos de escritura
+      final directorioSoporte = await getApplicationSupportDirectory();
+      directorioPath = directorioSoporte.path;
+    } else {
+      // En Android sigue usando el comportamiento por defecto de sqflite
+      directorioPath = await getDatabasesPath();
+    }
+
+    // Unimos la ruta segura con el nombre de tu base de datos
+    final ruta = join(directorioPath, 'database_docente.db');
+    //final ruta = join(await getDatabasesPath(), 'database_docente.db');
 
     return await openDatabase(
       ruta,
@@ -86,8 +101,10 @@ class DbHelper {
           CREATE TABLE $planeacionTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             perfil_id INTEGER,
+            fecha_creacion TEXT,
             ciclo_escolar TEXT,
             fecha_entrega TEXT,
+            fase_momento_etapa TEXT,
             nombre_escuela TEXT,
             nivel_educativo TEXT,
             fase_educativa TEXT,

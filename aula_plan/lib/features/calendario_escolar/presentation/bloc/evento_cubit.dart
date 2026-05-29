@@ -161,6 +161,7 @@ class EventoCubit extends Cubit<EventoState> {
       emit(state.copyWith(cargando: false, error: "Error al eliminar múltiples registros"));
     }
   }
+  
 
   // --- Helpers ---
 

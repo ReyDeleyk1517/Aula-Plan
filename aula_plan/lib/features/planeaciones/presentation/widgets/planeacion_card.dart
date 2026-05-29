@@ -4,6 +4,7 @@ import 'package:aula_plan/features/planeaciones/domain/entidades/planeacion_enti
 class PlaneacionCard extends StatelessWidget {
   final PlaneacionEntidad planeacion;
   final VoidCallback onTap;
+  final VoidCallback onEditTap; 
   final bool selected;
   final VoidCallback? onSelected;
 
@@ -11,6 +12,7 @@ class PlaneacionCard extends StatelessWidget {
     Key? key,
     required this.planeacion,
     required this.onTap,
+    required this.onEditTap, 
     this.selected = false,
     this.onSelected,
   }) : super(key: key);
@@ -21,8 +23,7 @@ class PlaneacionCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12, left: 8, right: 8),
-      elevation: selected ? 4 : 1, // Más elevación si está seleccionada
-      // Cambiamos el color de fondo si está seleccionada
+      elevation: selected ? 4 : 1, 
       color: selected ? const Color(0xFFE0E7FF) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -33,7 +34,7 @@ class PlaneacionCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
-        onLongPress: onSelected, // También permite seleccionar con long press
+        onLongPress: onSelected, 
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
@@ -47,9 +48,11 @@ class PlaneacionCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(16),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            // Centramos los elementos verticalmente para que la columna de botones se vea equilibrada
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF64748B)),
                   const SizedBox(height: 4),
@@ -67,6 +70,7 @@ class PlaneacionCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       planeacion.nivelEducativo.toUpperCase(),
@@ -93,15 +97,39 @@ class PlaneacionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Checkbox de selección con animación de color
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                icon: Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? const Color(0xFF6366F1) : Colors.grey.shade300,
-                  size: 26,
-                ),
-                onPressed: onSelected,
+              const SizedBox(width: 8),
+              
+              // --- SECCIÓN DE ACCIONES (SELECCIÓN ARRIBA, LÁPIZ DEBAJO) ---
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Checkbox de selección original (Arriba)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(
+                      selected ? Icons.check_circle : Icons.radio_button_unchecked,
+                      color: selected ? const Color(0xFF6366F1) : Colors.grey.shade300,
+                      size: 26,
+                    ),
+                    onPressed: onSelected,
+                  ),
+                  
+                  // Pequeño espaciador que se mantiene activo solo si el lápiz es visible
+                  if (!selected) const SizedBox(height: 4),
+
+                  // Icono del lápiz para editar de manera directa (Debajo - Solo si no está seleccionado)
+                  if (!selected)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        color: Color(0xFF64748B), // Gris sutil para control visual limpio
+                        size: 22,
+                      ),
+                      onPressed: onEditTap,
+                    ),
+                ],
               ),
             ],
           ),

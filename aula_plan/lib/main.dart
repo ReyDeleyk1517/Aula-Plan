@@ -1,8 +1,9 @@
+import 'package:aula_plan/acerca_de.dart';
 import 'package:aula_plan/features/planeaciones/presentation/paginas/planeacion_list_view.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/bloc/recurso_docente_cubit.dart';
 import 'package:aula_plan/features/recursos_docentes/presentation/paginas/recurso_docente_view.dart';
-import 'package:aula_plan/planeacion_screen.dart';
-import 'package:aula_plan/test_share_screen.dart';
+//import 'package:aula_plan/planeacion_screen.dart';
+//import 'package:aula_plan/test_share_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -69,7 +70,7 @@ class MainApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Aula Plan',
+        title: 'PlanApzz18',
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
@@ -142,7 +143,7 @@ class _AppStartState extends State<AppStart> {
             CircularProgressIndicator(),
             SizedBox(height: 20),
             Text(
-              "Iniciando Aula Plan...",
+              "Iniciando App",
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -159,58 +160,70 @@ class MenuPrincipal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Aula Plan - USAER'), centerTitle: true),
+      appBar: AppBar(title: const Text('Menu'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          children: [
-            _crearBotonModulo(
-              context,
-              titulo: 'Bitácora',
-              icono: Icons.auto_stories,
-              color: Colors.indigo,
-              destino: const BitacoraView(),
-            ),
-            _crearBotonModulo(
-              context,
-              titulo: 'Planeación',
-              icono: Icons.assignment_turned_in_rounded,
-              color: Colors.teal,
-              destino: PlaneacionListView(),
-            ),
-            _crearBotonModulo(
-              context,
-              titulo: 'Calendario',
-              icono: Icons.calendar_month_rounded,
-              color: Colors.redAccent,
-              destino: const EventoView(),
-            ),
-            _crearBotonModulo(
-              context,
-              titulo: 'Recursos',
-              icono: Icons.folder_shared_rounded,
-              color: Colors.amber,
-              destino: RecursosDocenteView(),
-            ),
-            _crearBotonModulo(
-              context,
-              titulo: 'Perfil',
-              icono: Icons.person_rounded,
-              color: Colors.orange,
-              destino: const PerfilView(),
-            ),
-            _crearBotonModulo(
-              context,
-              titulo: 'test',
-              icono: Icons.terrain_sharp,
-              color: Colors.orange,
-              destino: const TestShareScreen(),
-            ),
-            
-          ],
+        // LayoutBuilder detecta el tamaño disponible en tiempo real
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Determinamos si es escritorio/pantalla ancha (ej. más de 600px)
+            bool isDesktop = constraints.maxWidth > 600;
+
+            return GridView.count(
+              // Si es escritorio, ponemos 3 o más columnas, si es móvil dejamos 2
+              crossAxisCount: isDesktop ? 3 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              // Ajusta esto para que los botones no se estiren verticalmente:
+              // En escritorio (3 col) una proporción de 1.3 o 1.5 suele evitar el scroll
+              childAspectRatio: isDesktop ? 1.4 : 1.0,
+              children: [
+                _crearBotonModulo(
+                  context,
+                  titulo: 'Bitácora',
+                  icono: Icons.auto_stories,
+                  color: Colors.indigo,
+                  destino: const BitacoraView(),
+                ),
+                _crearBotonModulo(
+                  context,
+                  titulo: 'Planeación',
+                  icono: Icons.assignment_turned_in_rounded,
+                  color: Colors.teal,
+                  destino: PlaneacionListView(),
+                ),
+                _crearBotonModulo(
+                  context,
+                  titulo: 'Calendario',
+                  icono: Icons.calendar_month_rounded,
+                  color: Colors.redAccent,
+                  destino: const EventoView(),
+                ),
+                _crearBotonModulo(
+                  context,
+                  titulo: 'Recursos',
+                  icono: Icons.folder_shared_rounded,
+                  color: Colors.amber,
+                  destino: RecursosDocenteView(),
+                ),
+                _crearBotonModulo(
+                  context,
+                  titulo: 'Perfil',
+                  icono: Icons.person_rounded,
+                  color: Colors.orange,
+                  destino: const PerfilView(),
+                ),
+                _crearBotonModulo(
+                  context,
+                  titulo: 'Acerca de la app',
+                  icono: Icons.info_outline_rounded,
+                  color: Colors.blueGrey,
+                  destino: const AcercaDeView(), // La nueva pantalla
+                ),
+                
+              ],
+            );
+          },
         ),
       ),
     );

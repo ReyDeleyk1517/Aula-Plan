@@ -42,7 +42,7 @@ class EventoImplementacionRepositorio implements EventoRepositorio {
   EventoModelo _mapearEntidadAModelo(EventoEntidad evento, perfilId) {
     return EventoModelo(
       id: evento.id,
-      descripcion: evento.titulo,
+      descripcion: evento.descripcion,
       titulo: evento.titulo,
       fecha_inicio: evento.fecha_inicio,
       fecha_fin: evento.fecha_fin,

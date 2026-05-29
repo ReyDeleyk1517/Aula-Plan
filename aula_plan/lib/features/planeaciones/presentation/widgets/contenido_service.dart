@@ -4,9 +4,9 @@ import 'contenido_model.dart';
 
 class ContenidosService {
   static const Map<String, String> faseFiles = {
-    '2': 'assets/files/fase2_contenidos_pdabueno.json',
-    '3, 4 y 5': 'assets/files/fase345_contenidos_pdabueno.json',
-    '6': 'assets/files/fase6_contenidos_pdabueno.json',
+    '2': 'assets/files/fase2_contenidos_pda.json',
+    '3, 4 y 5': 'assets/files/fase345_contenidos_pda.json',
+    '6': 'assets/files/fase6_contenidos_pda.json',
   };
 
   Future<Map<String, List<ContenidoBusqueda>>> cargarContenidos(
@@ -108,19 +108,4 @@ class ContenidosService {
   }
 
 
-  Map<String, List<ContenidoBusqueda>> _procesarFaseSimple(
-    Map<String, dynamic> data,
-  ) {
-    Map<String, List<ContenidoBusqueda>> resultado = {};
-    data.forEach((campo, contenidos) {
-      final mapaContenidos = contenidos as Map<String, dynamic>;
-      resultado[campo] = mapaContenidos.entries.map((e) {
-        return ContenidoBusqueda(
-          titulo: e.key,
-          pdas: List<String>.from(e.value),
-        );
-      }).toList();
-    });
-    return resultado;
-  }
 }

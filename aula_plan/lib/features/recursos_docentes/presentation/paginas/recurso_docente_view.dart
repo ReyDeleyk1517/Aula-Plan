@@ -40,7 +40,12 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            context
+                .read<RecursosDocenteCubit>()
+                .limpiarSeleccion(); // Limpia antes de salir
+            Navigator.of(context).pop();
+          },
         ),
         title: const Text(
           'Recursos',
@@ -62,8 +67,12 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
             builder: (context, state) {
               if (state.seleccionadosIds.isNotEmpty) {
                 return Column(
+                  // Ocupa el mínimo espacio vertical necesario
                   mainAxisSize: MainAxisSize.min,
+                  // Alinea todos los botones a la derecha
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    //Exportar a zip
                     FloatingActionButton.extended(
                       heroTag: 'zip',
                       onPressed: () =>
@@ -74,7 +83,10 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
                       icon: const Icon(Icons.share),
                       backgroundColor: AppColors.accent,
                     ),
+
                     const SizedBox(height: 12),
+
+                    //eliminar
                     FloatingActionButton.extended(
                       heroTag: 'delete',
                       onPressed: () => _confirmarEliminacion(context),
@@ -83,6 +95,19 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
                       ),
                       icon: const Icon(Icons.delete),
                       backgroundColor: Colors.red,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    //Cancelar seleccion
+                    FloatingActionButton(
+                      heroTag: 'cancel_recursos',
+                      mini: true,
+                      onPressed: () => context
+                          .read<RecursosDocenteCubit>()
+                          .limpiarSeleccion(),
+                      backgroundColor: Colors.grey[400],
+                      child: const Icon(Icons.close, color: Colors.white),
                     ),
                   ],
                 );
@@ -107,7 +132,7 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
   // barra de búsqueda
   Widget _buildSearchBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16), 
+      padding: const EdgeInsets.all(16),
       color: Colors.white,
       child: Row(
         children: [
@@ -120,7 +145,7 @@ class _RecursosDocenteViewState extends State<RecursosDocenteView> {
                 hintText: 'Buscar recurso',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: const Color(0xFFF1F5F9), // El gris de planeaciones
+                fillColor: const Color(0xFFF1F5F9),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -278,7 +303,7 @@ class _RecursosList extends StatelessWidget {
             ),
           );
         return ListView.builder(
-          padding: const EdgeInsets.only(top: 15, bottom: 80),
+          padding: const EdgeInsets.only(top: 15, bottom: 220),
           itemCount: items.length,
           itemBuilder: (context, index) => RecursoCard(recurso: items[index]),
         );

@@ -58,6 +58,8 @@ class PlaneacionImplementacionRepositorio implements PlaneacionRepositorio {
       perfilId: perfilId,
       cicloEscolar: entidad.cicloEscolar,
       fechaEntrega: entidad.fechaEntrega,
+      fechaCreacion: entidad.fechaCreacion ?? DateTime.now().toIso8601String(),
+      faseMomentoEtapa: entidad.faseMomentoEtapa,
       nombreEscuela: entidad.nombreEscuela,
       nivelEducativo: entidad.nivelEducativo,
       faseEducativa: entidad.faseEducativa,

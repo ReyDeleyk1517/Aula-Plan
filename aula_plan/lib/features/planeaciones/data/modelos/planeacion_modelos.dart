@@ -32,6 +32,8 @@ class PlaneacionModelo extends PlaneacionEntidad {
     required String evaluacionIndicadores,
     required String evaluacionInstrumentos,
     required String problematica,
+    String? fechaCreacion,
+    String? faseMomentoEtapa,
     List<ActividadPlaneacionModelo> actividades = const [],
   }) : super(
          id: id,
@@ -67,6 +69,8 @@ class PlaneacionModelo extends PlaneacionEntidad {
          evaluacionIndicadores: evaluacionIndicadores,
          evaluacionInstrumentos: evaluacionInstrumentos,
          problematica: problematica,
+         fechaCreacion: fechaCreacion,
+         faseMomentoEtapa: faseMomentoEtapa,
          actividades: actividades,
        );
 
@@ -79,6 +83,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       perfilId: mapa['perfil_id'],
       cicloEscolar: mapa['ciclo_escolar'],
       fechaEntrega: mapa['fecha_entrega'],
+      faseMomentoEtapa: mapa['fase_momento_etapa'],
       nombreEscuela: mapa['nombre_escuela'],
       nivelEducativo: mapa['nivel_educativo'],
       faseEducativa: mapa['fase_educativa'],
@@ -108,6 +113,7 @@ class PlaneacionModelo extends PlaneacionEntidad {
       evaluacionIndicadores: mapa['evaluacion_indicadores'],
       evaluacionInstrumentos: mapa['evaluacion_instrumentos'],
       problematica: mapa['problematica'] ?? '',
+      fechaCreacion: mapa['fecha_creacion'],
       actividades: actividades,
     );
   }
@@ -118,6 +124,8 @@ class PlaneacionModelo extends PlaneacionEntidad {
       'perfil_id': perfilId,
       'ciclo_escolar': cicloEscolar,
       'fecha_entrega': fechaEntrega,
+      'fecha_creacion': fechaCreacion,
+      'fase_momento_etapa': faseMomentoEtapa,
       'nombre_escuela': nombreEscuela,
       'nivel_educativo': nivelEducativo,
       'fase_educativa': faseEducativa,
@@ -156,6 +164,8 @@ class PlaneacionModelo extends PlaneacionEntidad {
       perfilId: entidad.perfilId,
       cicloEscolar: entidad.cicloEscolar,
       fechaEntrega: entidad.fechaEntrega,
+      fechaCreacion: entidad.fechaCreacion,
+      faseMomentoEtapa: entidad.faseMomentoEtapa,
       nombreEscuela: entidad.nombreEscuela,
       nivelEducativo: entidad.nivelEducativo,
       faseEducativa: entidad.faseEducativa,

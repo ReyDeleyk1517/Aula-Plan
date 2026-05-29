@@ -12,6 +12,9 @@ class PlaneacionState {
   final String filtroNombreProyecto;
   final String filtroNombreEscuela;
   final String filtroFechaEntrega;
+  final String filtroFechaCreacionDesde;
+  final String filtroFechaCreacionHasta;
+  final String filtroFaseMomentoEtapa;
   final String filtroCicloEscolar;
   final String filtroNivelEducativo;
   final String filtroGradoGrupo;
@@ -27,6 +30,9 @@ class PlaneacionState {
     this.filtroNombreProyecto = "",
     this.filtroNombreEscuela = "",
     this.filtroFechaEntrega = "",
+    this.filtroFechaCreacionDesde = "",
+    this.filtroFechaCreacionHasta = "",
+    this.filtroFaseMomentoEtapa = "",
     this.filtroCicloEscolar = "",
     this.filtroNivelEducativo = "",
     this.filtroGradoGrupo = "",
@@ -42,6 +48,9 @@ class PlaneacionState {
     String? filtroNombreProyecto,
     String? filtroNombreEscuela,
     String? filtroFechaEntrega,
+    String? filtroFechaCreacionDesde,
+    String? filtroFechaCreacionHasta,
+    String? filtroFaseMomentoEtapa,
     String? filtroCicloEscolar,
     String? filtroNivelEducativo,
     String? filtroGradoGrupo,
@@ -57,6 +66,12 @@ class PlaneacionState {
       filtroNombreProyecto: filtroNombreProyecto ?? this.filtroNombreProyecto,
       filtroNombreEscuela: filtroNombreEscuela ?? this.filtroNombreEscuela,
       filtroFechaEntrega: filtroFechaEntrega ?? this.filtroFechaEntrega,
+      filtroFechaCreacionDesde:
+          filtroFechaCreacionDesde ?? this.filtroFechaCreacionDesde,
+      filtroFechaCreacionHasta:
+          filtroFechaCreacionHasta ?? this.filtroFechaCreacionHasta,
+      filtroFaseMomentoEtapa:
+          filtroFaseMomentoEtapa ?? this.filtroFaseMomentoEtapa,
       filtroCicloEscolar: filtroCicloEscolar ?? this.filtroCicloEscolar,
       filtroNivelEducativo: filtroNivelEducativo ?? this.filtroNivelEducativo,
       filtroGradoGrupo: filtroGradoGrupo ?? this.filtroGradoGrupo,
@@ -106,6 +121,21 @@ class PlaneacionCubit extends Cubit<PlaneacionState> {
     PlaneacionState s,
   ) {
     return data.where((p) {
+      if (s.filtroFaseMomentoEtapa.isNotEmpty) {
+        final v = p.faseMomentoEtapa ?? '';
+        if (!v.toLowerCase().contains(s.filtroFaseMomentoEtapa.toLowerCase())) {
+          return false;
+        }
+      }
+      bool inDateRange = true;
+      if (s.filtroFechaCreacionDesde.isNotEmpty) {
+        final c = p.fechaCreacion ?? '';
+        inDateRange = c.compareTo(s.filtroFechaCreacionDesde) >= 0;
+      }
+      if (inDateRange && s.filtroFechaCreacionHasta.isNotEmpty) {
+        final c = p.fechaCreacion ?? '';
+        inDateRange = c.compareTo(s.filtroFechaCreacionHasta) <= 0;
+      }
       return p.nombreProyecto.toLowerCase().contains(
             s.filtroNombreProyecto.toLowerCase(),
           ) &&
@@ -124,7 +154,8 @@ class PlaneacionCubit extends Cubit<PlaneacionState> {
           ) &&
           p.fechaEntrega.toLowerCase().contains(
             s.filtroFechaEntrega.toLowerCase(),
-          );
+          ) &&
+          inDateRange;
     }).toList();
   }
 
@@ -144,11 +175,21 @@ class PlaneacionCubit extends Cubit<PlaneacionState> {
   void setFiltroFase(String v) =>
       _actualizarYFiltrar(state.copyWith(filtroFaseEducativa: v));
 
+  void setFiltroFaseMomentoEtapa(String v) =>
+      _actualizarYFiltrar(state.copyWith(filtroFaseMomentoEtapa: v));
+
+  void setFiltroFechaCreacionDesde(String v) =>
+      _actualizarYFiltrar(state.copyWith(filtroFechaCreacionDesde: v));
+  void setFiltroFechaCreacionHasta(String v) =>
+      _actualizarYFiltrar(state.copyWith(filtroFechaCreacionHasta: v));
+
   void limpiarFiltros() {
     final estadoLimpio = state.copyWith(
       filtroNombreProyecto: "",
       filtroNombreEscuela: "",
       filtroFechaEntrega: "",
+      filtroFechaCreacionDesde: "",
+      filtroFechaCreacionHasta: "",
       filtroCicloEscolar: "",
       filtroNivelEducativo: "",
       filtroGradoGrupo: "",
