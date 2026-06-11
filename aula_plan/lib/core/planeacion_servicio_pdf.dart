@@ -64,18 +64,6 @@ class PlaneacionServicioPdf {
       fontWeight: pw.FontWeight.bold,
     );
 
-    final condicionesGuardadas = planeacion.condicionAlumnado
-        .split(',')
-        .map((e) => e.trim())
-        .toSet(); // Usar Set para habilitar busqueda con .contains
-
-    final nivelesSeleccionados = planeacion.nivelEducativo
-        .split(',')
-        .map(
-          (e) => e.trim().toUpperCase(),
-        ) 
-        .toSet();
-
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.letter,
@@ -165,27 +153,27 @@ class PlaneacionServicioPdf {
                     children: [
                       _cuadritoConSigla(
                         "INI",
-                        nivelesSeleccionados,
+                        planeacion.nivelEducativo,
                         estiloSigla,
                       ),
                       _cuadritoConSigla(
                         "PREE",
-                        nivelesSeleccionados,
+                        planeacion.nivelEducativo,
                         estiloSigla,
                       ),
                       _cuadritoConSigla(
                         "PRIM",
-                        nivelesSeleccionados,
+                        planeacion.nivelEducativo,
                         estiloSigla,
                       ),
                       _cuadritoConSigla(
                         "SEC",
-                        nivelesSeleccionados,
+                        planeacion.nivelEducativo,
                         estiloSigla,
                       ),
                       _cuadritoConSigla(
                         "BACH",
-                        nivelesSeleccionados,
+                        planeacion.nivelEducativo,
                         estiloSigla,
                       ),
                     ],
@@ -199,32 +187,32 @@ class PlaneacionServicioPdf {
                       children: [
                         _cuadritoConSigla(
                           "AS",
-                          condicionesGuardadas,
+                          planeacion.condicionAlumnado,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "D",
-                          condicionesGuardadas,
+                          planeacion.condicionAlumnado,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TEA",
-                          condicionesGuardadas,
+                          planeacion.condicionAlumnado,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TDAH",
-                          condicionesGuardadas,
+                          planeacion.condicionAlumnado,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "TE",
-                          condicionesGuardadas,
+                          planeacion.condicionAlumnado,
                           estiloSigla,
                         ),
                         _cuadritoConSigla(
                           "Regular",
-                          condicionesGuardadas,
+                          planeacion.condicionAlumnado,
                           estiloSigla,
                         ),
                       ],
@@ -817,25 +805,16 @@ class PlaneacionServicioPdf {
 
   static pw.Widget _cuadritoConSigla(
     String sigla,
-    Set<String> condiciones,
+    String lista,
     pw.TextStyle estilo,
   ) {
-    bool marcado = condiciones.contains(sigla);
+    final marcado = _contieneValor(lista, sigla);
 
     return pw.Column(
       mainAxisSize: pw.MainAxisSize.min,
       children: [
         pw.Text(sigla, style: estilo.copyWith(fontSize: 5)),
-        pw.Container(
-          width: 9,
-          height: 9,
-          decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
-          child: marcado
-              ? pw.Center(
-                  child: pw.Text("X", style: estilo.copyWith(fontSize: 7)),
-                )
-              : null,
-        ),
+        _cajitaCheckbox(marcado: marcado, estilo: estilo, size: 9),
       ],
     );
   }
@@ -897,30 +876,11 @@ class PlaneacionServicioPdf {
     String valorBD,
     pw.TextStyle estilo,
   ) {
-    bool marcado = false;
-    if (valorBD.trim().isNotEmpty) {
-      // Usamos una expresión regular para separar ya sea por coma (,) o por punto y coma (;)
-      final partes = valorBD
-          .split(RegExp(r'[,;]'))
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-      marcado = partes.contains(nombreEje.trim());
-    }
-
+    final marcado = _contieneValor(valorBD, nombreEje);
     return pw.Container(
       alignment: pw.Alignment.center,
       padding: const pw.EdgeInsets.only(top: 5, bottom: 5, left: 5),
-      child: pw.Container(
-        width: 10,
-        height: 10,
-        decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
-        child: marcado
-            ? pw.Center(
-                child: pw.Text("X", style: estilo.copyWith(fontSize: 7)),
-              )
-            : null,
-      ),
+      child: _cajitaCheckbox(marcado: marcado, estilo: estilo),
     );
   }
 
@@ -988,6 +948,33 @@ class PlaneacionServicioPdf {
         pw.SizedBox(height: 5),
         pw.Text(textofirma, style: const pw.TextStyle(fontSize: 8)),
       ],
+    );
+  }
+
+  // --- HELPERS UNIFICADOS ---
+
+  static bool _contieneValor(String lista, String valor) {
+    if (lista.trim().isEmpty) return false;
+    final valorNorm = valor.trim().toUpperCase();
+    return lista
+        .split(RegExp(r'[,;]'))
+        .map((s) => s.trim().toUpperCase())
+        .where((s) => s.isNotEmpty)
+        .contains(valorNorm);
+  }
+
+  static pw.Widget _cajitaCheckbox({
+    required bool marcado,
+    required pw.TextStyle estilo,
+    double size = 10,
+  }) {
+    return pw.Container(
+      width: size,
+      height: size,
+      decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
+      child: marcado
+          ? pw.Center(child: pw.Text("X", style: estilo.copyWith(fontSize: 7)))
+          : null,
     );
   }
 }

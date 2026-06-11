@@ -5,6 +5,7 @@ import 'package:aula_plan/features/planeaciones/domain/entidades/planeacion_enti
 import 'package:aula_plan/core/injection_container.dart' as di;
 import 'package:aula_plan/features/planeaciones/presentation/widgets/actividades_widget.dart';
 import 'package:aula_plan/features/planeaciones/presentation/widgets/buscador_contenido.dart';
+import 'package:aula_plan/features/planeaciones/presentation/widgets/selector_multiple.dart';
 
 class PlaneacionCrearEditarView extends StatefulWidget {
   final PlaneacionEntidad? planeacionExistente;
@@ -48,14 +49,12 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
   late List<String> _fasesSeleccionadas;
   late List<String> _condicionesSeleccionadas;
-  late List<String> _acompanamientosSeleccionados; // Nueva lista para selección múltiple
-
+  late List<String> _acompanamientosSeleccionados; 
+  late List<String> _escenariosSeleccionados;
   late String _nivelEducativo, _ejesArticuladores;
-  late bool _escAulicoSelected, _escEscolarSelected, _escComunitarioSelected;
-  late bool _escFamiliarSelected;
   late List<Map<String, String>> _actividades;
 
-  // Lista oficial de los 8 tipos de acompañamiento obtenidos del PDF
+  // Lista oficial de los 8 tipos de acompañamiento
   final List<String> _opcionesAcompanamiento = [
     "1. Ayudar a un alumno y sentarse a su lado",
     "2. Ayudar a un alumno aumentando progresivamente la distancia",
@@ -66,6 +65,31 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     "7. La maestra especialista conduce la actividad",
     "8. La maestra especialista prepara material para la clase",
   ];
+
+  final List<String> _opcionesFasesEducativas = [
+    "Fase 2",
+    "Fase 3",
+    "Fase 4",
+    "Fase 5",
+    "Fase 6",
+  ];
+
+  final List<String> _opcionesCondicionAlumnado = [
+    "AS",
+    "D",
+    "TEA",
+    "TDAH",
+    "TE",
+    "Regular",
+  ];
+
+  final List<String> _opcionesEscenarios = [
+    "Aulico",
+    "Escolar",
+    "Comunitario",
+    "Familiar",
+  ];
+
 
   @override
   void initState() {
@@ -132,18 +156,22 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     // Inicialización de los acompañamientos guardados previamente
     final acompanamientosString = p?.acompanamientos ?? '';
     _acompanamientosSeleccionados = acompanamientosString
-        .split(';') // Usamos punto y coma como separador recomendado debido al largo del texto
+        .split(
+          ';',
+        ) // Usamos punto y coma como separador recomendado debido al largo del texto
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
 
     _ejesArticuladores = p?.ejesArticuladores ?? "Inclusión";
 
-    final tokens = (p?.escenarios ?? '').split(',').map((s) => s.trim());
-    _escAulicoSelected = tokens.contains('Aulico');
-    _escEscolarSelected = tokens.contains('Escolar');
-    _escComunitarioSelected = tokens.contains('Comunitario');
-    _escFamiliarSelected = tokens.contains('Familiar');
+    _escenariosSeleccionados = (p?.escenarios ?? '')
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+
 
     _actividades = (p?.actividades ?? [])
         .map(
@@ -310,40 +338,27 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               Icons.calendar_month,
                               "2024-2025",
                             ),
-                            _buildMultiSelectSection(
-                              titulo: "Condición del Alumnado",
-                              opciones: [
-                                "AS",
-                                "D",
-                                "TEA",
-                                "TDAH",
-                                "TE",
-                                "Regular",
-                              ],
-                              seleccionados: _condicionesSeleccionadas,
-                              onSelected: (opt, val) {
+                            // Seleccion multiple de fases educativas
+                            MultiSelectField(
+                              titulo: "Fases Educativas",
+                              opciones: _opcionesFasesEducativas,
+                              seleccionados: _fasesSeleccionadas,
+                              color: zacTinto,
+                              onChanged: (value) {
                                 setState(() {
-                                  val
-                                      ? _condicionesSeleccionadas.add(opt)
-                                      : _condicionesSeleccionadas.remove(opt);
+                                  _fasesSeleccionadas = value;
                                 });
                               },
                             ),
-                            _buildMultiSelectSection(
-                              titulo: "Fases Educativas",
-                              opciones: [
-                                "Fase 2",
-                                "Fase 3",
-                                "Fase 4",
-                                "Fase 5",
-                                "Fase 6",
-                              ],
-                              seleccionados: _fasesSeleccionadas,
-                              onSelected: (opt, val) {
+
+                            MultiSelectField(
+                              titulo: "Condición del Alumnado",
+                              opciones: _opcionesCondicionAlumnado,
+                              seleccionados: _condicionesSeleccionadas,
+                              color: zacTinto,
+                              onChanged: (value) {
                                 setState(() {
-                                  val
-                                      ? _fasesSeleccionadas.add(opt)
-                                      : _fasesSeleccionadas.remove(opt);
+                                  _condicionesSeleccionadas = value;
                                 });
                               },
                             ),
@@ -359,17 +374,16 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               Icons.air,
                               "Disciplina...",
                             ),
-                            
-                            // SECCIÓN DE SELECCIÓN MÚLTIPLE DE ACOMPAÑAMIENTOS CON LOS TIPOS DEL PDF
-                            _buildMultiSelectSection(
-                              titulo: "Tipos de Acompañamiento (Maestros en el Aula)",
+
+                            // Seleccion multiple de tipos de acompañamiento
+                            MultiSelectField(
+                              titulo: "Tipos de Acompañamiento",
                               opciones: _opcionesAcompanamiento,
                               seleccionados: _acompanamientosSeleccionados,
-                              onSelected: (opt, val) {
+                              color: zacTinto,
+                              onChanged: (value) {
                                 setState(() {
-                                  val
-                                      ? _acompanamientosSeleccionados.add(opt)
-                                      : _acompanamientosSeleccionados.remove(opt);
+                                  _acompanamientosSeleccionados = value;
                                 });
                               },
                             ),
@@ -428,7 +442,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               "Describe la fase, momento o etapa...",
                               maxLines: 2,
                             ),
-                            
 
                             // BOTÓN DE BÚSQUEDA
                             Padding(
@@ -476,7 +489,19 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
                               onChanged: (val) =>
                                   setState(() => _ejesArticuladores = val!),
                             ),
-                            _buildEscenariosSection(),
+                            // Seleccion multiple de escenarios o contextos
+                            MultiSelectField(
+                              titulo: "Contexto(s):",
+                              opciones: _opcionesEscenarios,
+                              seleccionados: _escenariosSeleccionados,
+                              color: zacTinto,
+                              onChanged: (value) {
+                                setState(() {
+                                  _escenariosSeleccionados = value;
+                                });
+                              },
+                            ),
+
                             _customField(
                               _necesidadesCtrl,
                               "Necesidades, Intereses, Problematicas (NIP) y Barreras para el Aprendizaje y la Participación (BAP)",
@@ -579,100 +604,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
 
   // --- WIDGETS AUXILIARES ---
 
-  Widget _buildMultiSelectSection({
-    required String titulo,
-    required List<String> opciones,
-    required List<String> seleccionados,
-    required Function(String, bool) onSelected,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            titulo,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: zacTinto.withOpacity(0.8),
-            ),
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.black.withOpacity(0.05)),
-          ),
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: opciones.map((opt) {
-              final isSelected = seleccionados.contains(opt);
-              return GestureDetector(
-                onTap: () => onSelected(opt, !isSelected),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected ? zacTinto : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? zacTinto : zacTinto.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: zacTinto.withOpacity(0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isSelected
-                            ? Icons.check_circle
-                            : Icons.add_circle_outline,
-                        size: 16,
-                        color: isSelected ? Colors.white : zacTinto,
-                      ),
-                      const SizedBox(width: 6),
-                      // Flexible añadido por si los textos de acompañamiento son muy largos en pantallas chicas
-                      Flexible(
-                        child: Text(
-                          opt,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : zacTinto,
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
+ 
   Widget _buildSeccionTitulo(String titulo) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 8, top: 15),
@@ -737,108 +669,6 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.all(15),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEscenariosSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            //en texto debe decir contexto 
-            "Contextos",
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: zacTinto.withOpacity(0.8),
-            ),
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.black.withOpacity(0.05)),
-          ),
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _buildChip(
-                "Aulico",
-                _escAulicoSelected,
-                (v) => setState(() => _escAulicoSelected = v),
-              ),
-              _buildChip(
-                "Escolar",
-                _escEscolarSelected,
-                (v) => setState(() => _escEscolarSelected = v),
-              ),
-              _buildChip(
-                "Comunitario",
-                _escComunitarioSelected,
-                (v) => setState(() => _escComunitarioSelected = v),
-              ),
-              _buildChip(
-                "Familiar",
-                _escFamiliarSelected,
-                (v) => setState(() => _escFamiliarSelected = v),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildChip(String label, bool isSelected, Function(bool) onSelected) {
-    return GestureDetector(
-      onTap: () => onSelected(!isSelected),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? zacTinto : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? zacTinto : zacTinto.withOpacity(0.2),
-            width: 1.5,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: zacTinto.withOpacity(0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? Icons.check_circle : Icons.add_circle_outline,
-              size: 16,
-              color: isSelected ? Colors.white : zacTinto,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : zacTinto,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -945,12 +775,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         contenidos_etica_naturaleza_y_sociedad: _contenidosEticaCtrl.text,
         pda: _pdaCtrl.text,
         ejesArticuladores: _ejesArticuladores,
-        escenarios: [
-          _escAulicoSelected ? 'Aulico' : '',
-          _escEscolarSelected ? 'Escolar' : '',
-          _escComunitarioSelected ? 'Comunitario' : '',
-          _escFamiliarSelected ? 'Familiar' : '',
-        ].where((s) => s.isNotEmpty).join(', '),
+        escenarios: _escenariosSeleccionados.join(', '),
         metodologia: _metodologiaCtrl.text,
         observaciones: _observacionesCtrl.text,
         organizacionGrupo: _organizacionGrupoCtrl.text,
@@ -971,7 +796,7 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
         evaluacionInstrumentos: _instrumentosCtrl.text,
         problematica: _problematicaCtrl.text,
         faseMomentoEtapa: _faseMomentoEtapaCtrl.text,
-        
+
         // Se unen las opciones seleccionadas por un punto y coma (;), si está vacío se envía null
         acompanamientos: _acompanamientosSeleccionados.isNotEmpty
             ? _acompanamientosSeleccionados.join('; ')
@@ -981,4 +806,3 @@ class _PlaneacionCrearEditarViewState extends State<PlaneacionCrearEditarView> {
     }
   }
 }
-
