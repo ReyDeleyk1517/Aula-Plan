@@ -73,7 +73,7 @@ class PlaneacionServicioPdf {
         .split(',')
         .map(
           (e) => e.trim().toUpperCase(),
-        ) // Forzamos mayúsculas para evitar errores
+        ) 
         .toSet();
 
     pdf.addPage(
